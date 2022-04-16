@@ -25,6 +25,7 @@ public class UsersFactory extends AbstractLogComponent implements CommandLineRun
 
         List<User> users = List.of(
                 User.builder()
+                    .username("ganast")
                     .email("giannisanast@outlook.com")
                     .firstName("Ioannis")
                     .lastName("Anastasopoulos")
@@ -35,6 +36,7 @@ public class UsersFactory extends AbstractLogComponent implements CommandLineRun
                     .dateOfBirth(LocalDate.of(1998, 9, 4))
                     .build(),
                 User.builder()
+                    .username("cmichail")
                     .email("chmichail@outlook.com")
                     .firstName("Christos")
                     .lastName("Michail")
@@ -45,6 +47,7 @@ public class UsersFactory extends AbstractLogComponent implements CommandLineRun
                     .dateOfBirth(LocalDate.of(1996, 4, 13))
                     .build(),
                 User.builder()
+                    .username("giokomn")
                     .email("giorgoskomn@outlook.com")
                     .firstName("Giorgos")
                     .lastName("Komninos")
@@ -55,7 +58,8 @@ public class UsersFactory extends AbstractLogComponent implements CommandLineRun
                     .dateOfBirth(LocalDate.of(1982, 11, 28))
                     .build(),
                 User.builder()
-                    .email("giannisanast@outlook.com")
+                    .username("xristzior")
+                    .email("tziorixristina@outlook.com")
                     .firstName("Xristina")
                     .lastName("Tziori")
                     .about("Passionate Model with a strive for technology")
@@ -65,6 +69,7 @@ public class UsersFactory extends AbstractLogComponent implements CommandLineRun
                     .dateOfBirth(LocalDate.of(1986, 7, 2))
                     .build(),
                 User.builder()
+                    .username("stefmich")
                     .email("stefanosmichail@outlook.com")
                     .firstName("Stefanos")
                     .lastName("Michalis")
@@ -75,6 +80,7 @@ public class UsersFactory extends AbstractLogComponent implements CommandLineRun
                     .dateOfBirth(LocalDate.of(1992, 9, 12))
                     .build(),
                 User.builder()
+                    .username("kostamoul")
                     .email("kostasmoul@outlook.com")
                     .firstName("Kostantinos")
                     .lastName("Moulopoulos")
@@ -85,6 +91,7 @@ public class UsersFactory extends AbstractLogComponent implements CommandLineRun
                     .dateOfBirth(LocalDate.of(1998, 3, 21))
                     .build(),
                 User.builder()
+                    .username("nikival")
                     .email("nikivalente@outlook.com")
                     .firstName("Niki")
                     .lastName("Valente")

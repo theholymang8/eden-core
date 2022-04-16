@@ -10,4 +10,5 @@ public interface PostService extends BaseService<Post, Long>{
     List<Post> findRecentPosts(Integer limit);
 
     List<Post> findUserPosts(User user, Integer limit);
+
 }

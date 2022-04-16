@@ -1,7 +1,8 @@
 package com.core.rest.eden.domain;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.core.rest.eden.transfer.DTO.CommentView;
+import com.core.rest.eden.transfer.views.Views;
+import com.fasterxml.jackson.annotation.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
@@ -27,20 +28,24 @@ public class Comment extends BaseModel{
     @NotNull(message = "{dateCreated.null}")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd@HH:mm:ss")
     @Column(nullable = false)
+    @JsonView(Views.Public.class)
     private LocalDateTime dateCreated;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd@HH:mm:ss")
     @Column
+    @JsonView(Views.Public.class)
     private LocalDateTime dateUpdated;
 
     @NotNull(message = "{body.null}")
     @Column(length = 5000, nullable = false)
+    @JsonView(Views.Public.class)
     private String body;
 
     @ManyToOne
     private Post post;
 
     @OneToOne
+    @JsonView(Views.Public.class)
     private User user;
 
 }

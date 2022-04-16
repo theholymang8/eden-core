@@ -1,6 +1,8 @@
 package com.core.rest.eden.controllers.transfer;
 
+import com.core.rest.eden.transfer.views.Views;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonView;
 import lombok.Builder;
 import lombok.Value;
 
@@ -10,6 +12,7 @@ import java.util.UUID;
 
 @Value
 @Builder
+@JsonView(Views.Public.class)
 public class ApiResponse<T> implements Serializable {
     String transactionId = UUID.randomUUID().toString().toUpperCase();
 

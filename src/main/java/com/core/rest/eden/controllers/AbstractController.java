@@ -4,6 +4,8 @@ import com.core.rest.eden.base.AbstractLogComponent;
 import com.core.rest.eden.controllers.transfer.ApiResponse;
 import com.core.rest.eden.domain.BaseModel;
 import com.core.rest.eden.services.BaseService;
+import com.core.rest.eden.transfer.views.Views;
+import com.fasterxml.jackson.annotation.JsonView;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -11,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.List;
+
 
 public abstract class AbstractController<T extends BaseModel> extends AbstractLogComponent {
     protected abstract BaseService<T, Long> getBaseService();
@@ -20,6 +23,7 @@ public abstract class AbstractController<T extends BaseModel> extends AbstractLo
         return ResponseEntity.ok(ApiResponse.<T>builder().data(getBaseService().find(id)).build());
     }
 
+    @JsonView(Views.Public.class)
     @GetMapping
     public ResponseEntity<ApiResponse<List<T>>> findAll() {
         return ResponseEntity.ok(ApiResponse.<List<T>>builder().data(getBaseService().findAll()).build());

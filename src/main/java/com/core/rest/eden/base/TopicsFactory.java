@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 
 @Component
 @RequiredArgsConstructor
@@ -129,47 +130,54 @@ public class TopicsFactory extends AbstractLogComponent implements CommandLineRu
                   .build()
         );
 
+        topics.forEach(topic -> logger.info("Topic : {}", topic));
+
         if (!users.isEmpty()) {
+            logger.info("I exist.");
+            topics.get(0).setUsers(Set.of(users.get(0)));
 
-            topics.get(0).setUser(users.get(0));
+            topics.get(1).setUsers(Set.of(users.get(0)));
 
-            topics.get(1).setUser(users.get(0));
+            topics.get(2).setUsers(Set.of(users.get(1)));
 
-            topics.get(2).setUser(users.get(1));
+            topics.get(3).setUsers(Set.of(users.get(1)));
 
-            topics.get(3).setUser(users.get(1));
+            topics.get(4).setUsers(Set.of(users.get(2)));
 
-            topics.get(4).setUser(users.get(2));
+            topics.get(5).setUsers(Set.of(users.get(2)));
 
-            topics.get(5).setUser(users.get(2));
+            topics.get(6).setUsers(Set.of(users.get(3)));
 
-            topics.get(6).setUser(users.get(3));
+            topics.get(7).setUsers(Set.of(users.get(3)));
 
-            topics.get(7).setUser(users.get(3));
+            topics.get(8).setUsers(Set.of(users.get(4)));
 
-            topics.get(8).setUser(users.get(4));
+            topics.get(9).setUsers(Set.of(users.get(4)));
 
-            topics.get(9).setUser(users.get(4));
+            topics.get(10).setUsers(Set.of(users.get(1)));
 
-            topics.get(10).setUser(users.get(1));
+            topics.get(11).setUsers(Set.of(users.get(1)));
 
-            topics.get(11).setUser(users.get(1));
+            topics.get(12).setUsers(Set.of(users.get(1)));
 
-            topics.get(12).setUser(users.get(1));
+            topics.get(13).setUsers(Set.of(users.get(0)));
 
-            topics.get(13).setUser(users.get(0));
+            topics.get(14).setUsers(Set.of(users.get(0)));
 
-            topics.get(14).setUser(users.get(0));
+            topics.get(15).setUsers(Set.of(users.get(2)));
 
-            topics.get(15).setUser(users.get(2));
+            topics.get(16).setUsers(Set.of(users.get(2)));
 
-            topics.get(16).setUser(users.get(2));
-
-            topics.get(17).setUser(users.get(3));
+            topics.get(17).setUsers(Set.of(users.get(3)));
 
         }
 
         logger.info("Created {} topics", topics.size());
+
+        //topics.forEach(topic -> {
+           // logger.info("Topic : {}", topic);
+        //});
+
         topicService.createAll(topics);
 
     }
