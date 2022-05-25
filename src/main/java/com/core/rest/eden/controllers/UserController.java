@@ -51,6 +51,8 @@ public class UserController extends AbstractController<User>{
                 .build());
     }
 
+
+
     @JsonView(Views.Public.class)
     @GetMapping(
             headers = "action=findPosts",
@@ -64,7 +66,41 @@ public class UserController extends AbstractController<User>{
                 .build());
     }
 
+    @JsonView(Views.Public.class)
+    @GetMapping(
+            headers = "action=findTopicRelated",
+            params = {"username", "limit"})
+    public ResponseEntity<ApiResponse<List<Post>>> findTopicRelatedPosts(
+            @Valid @RequestParam("username") List<String> usernames,
+            @RequestParam Integer limit){
+        return ResponseEntity.ok(ApiResponse.<List<Post>>builder()
+                .data(userService.findTopicRelatedPosts(usernames, limit))
+                .build());
+    }
 
+    @JsonView(Views.Public.class)
+    @GetMapping(
+            headers = "action=findPostsByUsername",
+            params = {"username", "limit"})
+    public ResponseEntity<ApiResponse<List<Post>>> findPostsByUsername(
+            @Valid @RequestParam("username") String username,
+            @RequestParam Integer limit){
+        return ResponseEntity.ok(ApiResponse.<List<Post>>builder()
+                .data(userService.findPostsByUsername(username, limit))
+                .build());
+    }
+
+    @JsonView(Views.Public.class)
+    @GetMapping(
+            headers = "action=findFriendsPosts",
+            params = {"username", "limit"})
+    public ResponseEntity<ApiResponse<List<Post>>> findFriendsPosts(
+            @Valid @RequestParam("username") String username,
+            @RequestParam("limit") Integer limit){
+        return ResponseEntity.ok(ApiResponse.<List<Post>>builder()
+                .data(userService.findFriendsPosts(username, limit))
+                .build());
+    }
 
     @PostMapping(
             headers = "action=addRole",

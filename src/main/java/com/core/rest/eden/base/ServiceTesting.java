@@ -58,5 +58,7 @@ public class ServiceTesting extends AbstractLogComponent implements CommandLineR
         //UserPostView userPostView = new UserPostView(name, posts.get(0).getDateCreated(), posts.get(0).getDateUpdated(), posts.get(0).getBody(), posts.get(0).getLikes(), postComments);
 
         //logger.info("Testing userPostView : {}", userPostView);
+
+        userService.findFriends(user).forEach(friend -> logger.info("Giannis has the following friend: {}", friend));
     }
 }

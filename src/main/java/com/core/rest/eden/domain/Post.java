@@ -14,8 +14,8 @@ import java.util.Set;
 @AllArgsConstructor
 @NoArgsConstructor
 @SuperBuilder
-@ToString(callSuper = true, exclude = {"comments", "user"})
-@EqualsAndHashCode(callSuper = true, exclude = {"comments", "user"})
+@ToString(callSuper = true, exclude = {"comments", "user", "files"})
+@EqualsAndHashCode(callSuper = true, exclude = {"comments", "user", "files"})
 @Data
 
 @Entity
@@ -24,7 +24,7 @@ import java.util.Set;
 @JsonIgnoreProperties(value = {"user"})
 
 @SequenceGenerator(name = "idGenerator", sequenceName = "POST_SEQ", allocationSize = 1)
-public class Post extends BaseModel{
+public class Post extends BaseModel implements Comparable<Post>{
 
     @NotNull(message = "{dateCreated.null}")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd@HH:mm:ss")
@@ -46,6 +46,19 @@ public class Post extends BaseModel{
     @JsonView(Views.Public.class)
     private Integer likes;
 
+    @ManyToMany(mappedBy = "posts",
+            fetch = FetchType.EAGER
+    )
+    @JsonView(Views.Detailed.class)
+    private Set<Topic> topics = new HashSet<>();
+
+    @JsonView(Views.Public.class)
+    @OneToMany(
+            cascade = {CascadeType.MERGE, CascadeType.REFRESH, CascadeType.DETACH},
+            fetch = FetchType.EAGER,
+            mappedBy = "post"
+    )
+    private Set<File> files;
 
     @OneToMany(cascade = {CascadeType.MERGE, CascadeType.REFRESH, CascadeType.DETACH},
                 fetch = FetchType.LAZY,
@@ -58,4 +71,12 @@ public class Post extends BaseModel{
     @JsonView(Views.Detailed.class)
     private User user;
 
+
+    @Override
+    public int compareTo(Post post) {
+        if (getDateCreated() == null || post.getDateCreated() == null) {
+            return 0;
+        }
+        return getDateCreated().compareTo(post.getDateCreated());
+    }
 }

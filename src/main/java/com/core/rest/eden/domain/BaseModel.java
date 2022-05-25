@@ -1,5 +1,7 @@
 package com.core.rest.eden.domain;
 
+import com.core.rest.eden.transfer.views.Views;
+import com.fasterxml.jackson.annotation.JsonView;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
@@ -23,7 +25,7 @@ public class BaseModel implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "idGenerator")
-    //@JsonIgnore
+    @JsonView(Views.Public.class)
     private Long id;
 
 }

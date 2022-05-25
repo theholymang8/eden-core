@@ -19,6 +19,7 @@ import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -41,6 +42,43 @@ public class TokenUtil extends AbstractLogComponent {
 
     //private final FilterChain filterChain;
     //private final Algorithm algorithm;
+
+    public static Map<String, String> decodeToken(String accessToken) {
+
+        Algorithm algorithm = Algorithm.HMAC256("secret".getBytes());
+        JWTVerifier verifier = JWT.require(algorithm).build();
+        DecodedJWT decodedJWT = verifier.verify(accessToken);
+        String username = decodedJWT.getSubject();
+        String[] roles = decodedJWT.getClaim("roles").asArray(String.class);
+
+        return new HashMap<>(){{
+           put("username", username);
+           Integer identifier = 0;
+           for (String role : roles) {
+                put("role"+(++identifier), role);
+           }
+        }};
+    }
+
+    public static Map<String, String> extractTokensFromCookie(Cookie[] cookies) throws NullPointerException {
+        String accessToken = null;
+        String refreshToken = null;
+        for (Cookie cookie : cookies) {
+            if (cookie.getName().equals("jwt-token")) {
+                accessToken = cookie.getValue();
+            }else if (cookie.getName().equals("refresh-Token")) {
+                refreshToken = cookie.getValue();
+            }
+            //log.info("Cookie name: {} and value: {}", cookie.getName(), cookie.getValue());
+        }
+
+        String finalAccessToken  = accessToken;
+        String finalRefreshToken = refreshToken;
+        return new HashMap<>(){{
+            put("access-token"  , finalAccessToken);
+            put("refresh-token" , finalRefreshToken);
+        }};
+    }
 
     public Boolean generateToken(String authorizationHeader) throws IOException {
         //String authorizationHeader = request.getHeader(AUTHORIZATION);

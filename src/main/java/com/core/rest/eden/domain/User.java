@@ -14,8 +14,8 @@ import java.util.Set;
 @AllArgsConstructor
 @NoArgsConstructor
 @SuperBuilder
-@ToString(callSuper = true, exclude = {"groups", "comment"})
-@EqualsAndHashCode(callSuper = true, exclude = {"groups", "comment"})
+@ToString(callSuper = true, exclude = {"groups", "comment", "files", "topics"})
+@EqualsAndHashCode(callSuper = true, exclude = {"groups", "comment", "files", "topics"})
 @Data
 
 @Entity
@@ -68,6 +68,13 @@ public class User extends BaseModel{
     @JsonView(Views.Detailed.class)
     private Gender gender;
 
+    @OneToMany(
+            cascade = {CascadeType.MERGE, CascadeType.REFRESH, CascadeType.DETACH},
+            fetch = FetchType.EAGER,
+            mappedBy = "user"
+    )
+    private Set<File> files;
+
     @NotNull(message = "{roles.null}")
     @ElementCollection(fetch = FetchType.EAGER, targetClass=Role.class)
     @Enumerated(EnumType.STRING)
@@ -98,4 +105,5 @@ public class User extends BaseModel{
     @ManyToMany(mappedBy = "members", fetch = FetchType.LAZY)
     @JsonView(Views.Detailed.class)
     private Set<Group> groups = new HashSet<>();
+
 }

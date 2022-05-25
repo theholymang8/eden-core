@@ -19,6 +19,7 @@ public abstract class AbstractController<T extends BaseModel> extends AbstractLo
     protected abstract BaseService<T, Long> getBaseService();
 
     @GetMapping("/{id}")
+    @JsonView(Views.Public.class)
     public ResponseEntity<ApiResponse<T>> get(@PathVariable("id") final Long id) {
         return ResponseEntity.ok(ApiResponse.<T>builder().data(getBaseService().find(id)).build());
     }

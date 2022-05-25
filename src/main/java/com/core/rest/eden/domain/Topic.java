@@ -7,6 +7,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonView;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
+import org.hibernate.annotations.Cascade;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
@@ -17,11 +18,11 @@ import java.util.Set;
 @AllArgsConstructor
 @NoArgsConstructor
 @SuperBuilder
-@ToString(callSuper = true, exclude = {"users"})
-@EqualsAndHashCode(callSuper = true, exclude = {"users"})
+@ToString(callSuper = true, exclude = {"users", "posts"})
+@EqualsAndHashCode(callSuper = true, exclude = {"users", "posts"})
 @Data
 
-@JsonIgnoreProperties(value = {"users"})
+@JsonIgnoreProperties(value = {"users", "posts"})
 
 @Entity
 @Table(name = "TOPICS")
@@ -46,7 +47,19 @@ public class Topic extends BaseModel{
     private LocalDateTime dateUpdated;
 
     @ManyToMany(
-            cascade = {CascadeType.MERGE, CascadeType.REFRESH, CascadeType.DETACH},
+            cascade = {CascadeType.REFRESH, CascadeType.DETACH},
+            fetch = FetchType.EAGER)
+    @JoinTable(name = "`POST_TOPICS`",
+            joinColumns = @JoinColumn(name = "`post_id`"),
+            foreignKey = @ForeignKey(name = "post_id"),
+            inverseJoinColumns = @JoinColumn(name = "`topic_id`"),
+            inverseForeignKey = @ForeignKey(name = "topic_id")
+    )
+    @JsonView(Views.Detailed.class)
+    private Set<Post> posts = new HashSet<>();
+
+    @ManyToMany(
+            cascade = {CascadeType.REFRESH, CascadeType.DETACH},
             fetch = FetchType.EAGER)
     @JoinTable(name = "`USER_TOPICS`",
             joinColumns = @JoinColumn(name = "`user_id`"),

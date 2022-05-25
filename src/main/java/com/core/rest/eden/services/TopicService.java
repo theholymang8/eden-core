@@ -10,6 +10,6 @@ public interface TopicService extends BaseService<Topic, Long>{
 
     Topic findByTitle(String title);
 
-    List<Topic> findByUsers(List<String> users);
+    Set<Topic> findByUsers(List<User> users);
 
 }
