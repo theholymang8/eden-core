@@ -1,20 +1,21 @@
 package com.core.rest.eden.services;
 
-import com.core.rest.eden.domain.Post;
-import com.core.rest.eden.domain.Role;
-import com.core.rest.eden.domain.Topic;
-import com.core.rest.eden.domain.User;
+import com.core.rest.eden.domain.*;
+import com.core.rest.eden.exceptions.UserAlreadyExistsException;
 import com.core.rest.eden.repositories.UserRepository;
+import com.core.rest.eden.transfer.DTO.UserRegisterDTO;
 import com.core.rest.eden.transfer.DTO.UserView;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Sort;
+import org.hibernate.annotations.Type;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.util.Base64Utils;
 
 import javax.transaction.Transactional;
 import java.util.*;
@@ -26,11 +27,11 @@ import java.util.stream.Collectors;
 public class UserServiceImpl extends BaseServiceImpl<User> implements UserService, UserDetailsService {
 
     private final UserRepository userRepository;
-
     private final TopicService topicService;
-
     private final PostService postService;
+    private final FileService fileService;
 
+    //private final BCryptPasswordEncoder bCryptPasswordEncoder;
     private final PasswordEncoder passwordEncoder;
 
     @Override
@@ -116,6 +117,49 @@ public class UserServiceImpl extends BaseServiceImpl<User> implements UserServic
                 .subList(0, limit);
     }
 
+    @Override
+    public User registerUser(UserRegisterDTO user) throws UserAlreadyExistsException, NullPointerException{
+        /* Check for duplicate emails and username */
+        if(emailExist(user.getEmail()) || usernameExist(user.getUserName())){
+            throw new UserAlreadyExistsException("An account with this username/email already exists", new Exception("Custom Authentication Exception"));
+        }
+        /* Decode User's Avatar from base64 format */
+        logger.info("User's image is: {}", user.getAvatar());
+        byte[] fileBytes = Base64Utils.decodeFromString(user.getAvatar().getBase64());
+
+        File avatar = File.builder()
+                .name(user.getAvatar().getName())
+                .contentType(user.getAvatar().getContentType())
+                .data(fileBytes)
+                .size(user.getAvatar().getSize())
+                .build();
+
+
+
+        User newUser = User.builder()
+                .firstName(user.getFirstName())
+                .lastName(user.getLastName())
+                .username(user.getUserName())
+                .password(passwordEncoder.encode(user.getPassword()))
+                .email(user.getEmail())
+                .dateOfBirth(user.getDateOfBirth())
+                .gender(user.getGender())
+                .about(user.getAbout())
+                .avatar(avatar)
+                .roles(Set.of(Role.USER))
+                .topics(user.getTopics())
+                .build();
+
+
+        avatar.setUser(newUser);
+
+        fileService.create(avatar);
+        //logger.info("")
+
+        logger.info("New User has registered: {}", user);
+        return userRepository.save(newUser);
+    }
+
     /*@Override
     public List<Post> findFriendsPostsPageable(String username, Integer limit) {
         User user = userRepository.findByUsername(username);
@@ -132,5 +176,13 @@ public class UserServiceImpl extends BaseServiceImpl<User> implements UserServic
         Collection<SimpleGrantedAuthority> authorities = new ArrayList<>();
         user.getRoles().forEach(role -> authorities.add(new SimpleGrantedAuthority(role.toString())));
         return new org.springframework.security.core.userdetails.User(user.getUsername(), user.getPassword(), authorities);
+    }
+
+    private boolean usernameExist(String username) {
+        return userRepository.findByUsername(username) != null;
+    }
+
+    private boolean emailExist(String email) {
+        return userRepository.findByEmail(email) != null;
     }
 }

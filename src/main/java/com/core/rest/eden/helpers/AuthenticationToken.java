@@ -17,7 +17,7 @@ import java.io.Serializable;
 
 public class AuthenticationToken implements Serializable {
 
-    @Value("${jwt.keyword}")
+    @Value("${jwt_keyword}")
     private static String TOKEN_SECRET;
 
     private String accessToken;

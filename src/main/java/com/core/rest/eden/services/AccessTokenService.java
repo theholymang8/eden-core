@@ -24,6 +24,10 @@ public interface AccessTokenService {
 
     String generateRefreshToken(User user, String issuer);
 
+    String generateToken(com.core.rest.eden.domain.User user, String issuer);
+
+    String generateRefreshToken(com.core.rest.eden.domain.User user, String issuer);
+
     String createToken(Map<String, List<String>> claims, String subject, String issuer);
 
     String createRefreshToken(Map<String, List<String>> claims, String subject, String issuer);

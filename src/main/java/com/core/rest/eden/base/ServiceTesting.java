@@ -42,23 +42,31 @@ public class ServiceTesting extends AbstractLogComponent implements CommandLineR
         //        .getPosts()
         //        .forEach(post -> logger.info("Ioannis has this post: {}", post));
 
-        logger.info("User: {}", userService.findByName("Ioannis", "Anastasopoulos"));
+        //List<User> users = userService.findAll();
 
-        User user = userService.findByName("Ioannis", "Anastasopoulos");
+        //users.forEach(user -> logger.info("User: {}, {}", user.getFirstName(), user.getLastName()));
 
-        List<Post> posts = userService.findPosts("Ioannis", "Anastasopoulos", 5);
+        User user = userService.findByUsername("marasouv");
 
-        List<CommentView> postComments = commentService.postComments(posts.get(0));
+        //User user = userService.findByName("Pavlos", "Poulos");
+
+        //List<Post> posts = userService.findPosts("Ioannis", "Anastasopoulos", 5);
+
+        //List<CommentView> postComments = commentService.postComments(posts.get(0));
         //List<Comment> comments = commentService.userComments(posts.get(0));
 
-        logger.info("Post's comments are : {}", commentService.postComments(posts.get(0)));
+        //logger.info("Post's comments are : {}", commentService.postComments(posts.get(0)));
 
-        String name = "Ioannis" + "Anastasopoulos";
+        //String name = "Ioannis" + "Anastasopoulos";
+
+        //user.getTopics().forEach(topic -> logger.info("Topic: {}", topic.getTitle()));
 
         //UserPostView userPostView = new UserPostView(name, posts.get(0).getDateCreated(), posts.get(0).getDateUpdated(), posts.get(0).getBody(), posts.get(0).getLikes(), postComments);
 
         //logger.info("Testing userPostView : {}", userPostView);
 
-        userService.findFriends(user).forEach(friend -> logger.info("Giannis has the following friend: {}", friend));
+        user.getTopics().forEach(topic -> logger.info("Mariana has these topics: {}", topic.getTitle()));
+
+        //userService.findFriends(user).forEach(friend -> logger.info("Giannis has the following friend: {}", friend));
     }
 }

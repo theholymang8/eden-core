@@ -4,6 +4,7 @@ import com.core.rest.eden.base.AbstractLogComponent;
 
 
 import com.core.rest.eden.transfer.DTO.UserView;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -22,17 +23,56 @@ import static java.util.Arrays.stream;
 @RequiredArgsConstructor
 public class AuthenticationServiceImpl extends AbstractLogComponent implements AuthenticationService {
 
-
-    private final UserView userView;
+    private final UserService userService;
     private final AccessTokenService accessTokenService;
-    private String issuer;
+    //private String issuer;
 
+
+    @Override
+    public Cookie generateExpiredAccessCookie() {
+        return new Cookie("access-token", null) {{
+            setMaxAge(0);
+            setHttpOnly(true);
+            setPath("/");
+        }};
+    }
+
+    @Override
+    public Cookie generateExpiredRefreshCookie() {
+        return new Cookie("refresh-token", null) {{
+            setMaxAge(0);
+            setHttpOnly(true);
+            setPath("/");
+        }};
+    }
+
+    @Override
+    public String generateAccessToken(@NotNull User user, String issuer) {
+        return accessTokenService.generateToken(user, issuer);
+    }
+
+    @Override
+    public String generateRefreshToken(@NotNull User user, String issuer) {
+        return accessTokenService.generateRefreshToken(user, issuer);
+    }
+
+    @Override
+    public String generateAccessToken(com.core.rest.eden.domain.User user, String issuer) {
+        return accessTokenService.generateToken(user, issuer);
+    }
+
+    @Override
+    public String generateRefreshToken(com.core.rest.eden.domain.User user, String issuer) {
+        return accessTokenService.generateRefreshToken(user, issuer);
+    }
+
+    @Override
     public String extractToken(String authHeader) throws IndexOutOfBoundsException{
         return authHeader.substring("Bearer ".length());
     }
 
     @Override
-    public Boolean validateToken(String authHeader){
+    public Boolean validateToken(String authHeader) throws NullPointerException {
         if (!authHeader.startsWith("Bearer ")) return false;
 
         String token = extractToken(authHeader);
@@ -65,11 +105,31 @@ public class AuthenticationServiceImpl extends AbstractLogComponent implements A
     }
 
     @Override
+    public String extractTokenFromCookie(Cookie[] cookies, String value) {
+        if (!validateCookie(cookies, value)) return null;
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                if (cookie.getName().equals(value)) {
+                    return cookie.getValue();
+                }
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public String provideUser(String token) {
+        return accessTokenService.extractUsername(token);
+    }
+
+    @Override
     public Boolean validateCookie(Cookie[] cookies, String value) {
         if (cookies != null) {
             for (Cookie cookie : cookies) {
                 if (cookie.getName().equals(value)) {
-                    return true;
+                    if (accessTokenService.validateToken(cookie.getValue(), accessTokenService.extractUsername(cookie.getValue()))) {
+                        return true;
+                    }
                 }
             }
         }
@@ -78,8 +138,8 @@ public class AuthenticationServiceImpl extends AbstractLogComponent implements A
     }
 
     @Override
-    public Cookie generateAccessCookie(@NotNull User user, String issuer) {
-        return new Cookie("access-token", accessTokenService.generateToken(user, issuer)) {{
+    public Cookie generateAccessCookie(String accessToken) {
+        return new Cookie("access-token", accessToken) {{
             setMaxAge(10 * 60);
             setHttpOnly(true);
             setPath("/");
@@ -87,8 +147,8 @@ public class AuthenticationServiceImpl extends AbstractLogComponent implements A
     }
 
     @Override
-    public Cookie generateRefreshCookie(User user, String issuer) {
-        return new Cookie("access-token", accessTokenService.generateRefreshToken(user, issuer)) {{
+    public Cookie generateRefreshCookie(String refreshToken) {
+        return new Cookie("refresh-token", refreshToken) {{
             setMaxAge(30 * 60);
             setHttpOnly(true);
             setPath("/");

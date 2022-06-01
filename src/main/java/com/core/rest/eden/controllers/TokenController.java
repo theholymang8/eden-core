@@ -7,6 +7,7 @@ import com.auth0.jwt.interfaces.DecodedJWT;
 import com.core.rest.eden.domain.Role;
 import com.core.rest.eden.domain.User;
 import com.core.rest.eden.helpers.RefreshTokenEntity;
+import com.core.rest.eden.services.AuthenticationService;
 import com.core.rest.eden.services.JWTService;
 import com.core.rest.eden.services.UserService;
 import com.core.rest.eden.transfer.DTO.UserView;
@@ -45,157 +46,61 @@ public class TokenController {
 
     private final UserService userService;
 
+    private final AuthenticationService authenticationService;
+
     private final JWTService jwtService;
 
     @JsonView(Views.Public.class)
     @GetMapping(
             path = "/refresh")
     public void refreshToken(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        //String authorizationHeader = request.getHeader(AUTHORIZATION);
-        String refresh_token = null;
+        if (authenticationService.validateCookie(request.getCookies(), "refresh-token")) {
 
-        for (Cookie cookie : request.getCookies()) {
-            if (cookie.getName().equals("refresh-token")) {
-                refresh_token = cookie.getValue();
-            }
-            log.info("Cookie name: {} and value: {}", cookie.getName(), cookie.getValue());
-        }
+            String providedToken = authenticationService.extractTokenFromCookie(request.getCookies(), "refresh-token");
+            User user = userService.findByUsername(authenticationService.provideUser(providedToken));
 
+            String accessToken = authenticationService.generateAccessToken(user, request.getRequestURL().toString());
+            String refreshToken = authenticationService.generateRefreshToken(user, request.getRequestURL().toString());
 
+            response.addCookie(authenticationService.generateAccessCookie(accessToken));
+            response.addCookie(authenticationService.generateRefreshCookie(refreshToken));
 
-        if (refresh_token != null) {
+            UserView authenticatedUser = userService.findByUsernameAuth(user.getUsername());
+            authenticatedUser.setAccessToken(accessToken);
+            authenticatedUser.setRefreshToken(refreshToken);
 
-            log.info("Token is: {}", refresh_token);
-            /* Pass the token and filter out the word Bearer */
-            try {
-                //String auth_refresh_token = authorizationHeader.substring("Bearer ".length());
-                /* If Token from cookie and header match */
-                //if (auth_refresh_token.equals(refresh_token)) {
+            response.setContentType(APPLICATION_JSON_VALUE);
+            new ObjectMapper().writeValue(response.getOutputStream(), authenticatedUser);
 
-                    Algorithm algorithm = Algorithm.HMAC256("secret".getBytes());
-                    JWTVerifier verifier = JWT.require(algorithm).build();
-                    DecodedJWT decodedJWT = verifier.verify(refresh_token);
-                    String username = decodedJWT.getSubject();
-
-                    /* Check whether Redis has persisted the claimed refresh Token */
-                    if (jwtService.findByRefreshToken(refresh_token) != null) {
-                        User user = userService.findByUsername(username);
-                        UserView authenticatedUser = userService.findByUsernameAuth(username);
-
-                        String access_token = JWT.create()
-                                .withSubject(user.getUsername())
-                                /* 10 Minutes expiration date */
-                                .withExpiresAt(new Date(System.currentTimeMillis() + 10 * 60 * 1000))
-                                .withIssuer(request.getRequestURL().toString())
-                                .withClaim("roles", user.getRoles().stream().map(Role::toString).collect(Collectors.toList()))
-                                .sign(algorithm);
-
-                        authenticatedUser.setAccessToken(access_token);
-                        authenticatedUser.setRefreshToken(refresh_token);
-
-                        Cookie cookie = new Cookie("jwt-token", access_token);
-                        cookie.setPath("/");
-                        cookie.setHttpOnly(true);
-                        cookie.setMaxAge(10 * 60);
-                        Cookie refreshCookie = new Cookie("refresh-token", refresh_token);
-                        refreshCookie.setPath("/");
-                        refreshCookie.setHttpOnly(true);
-                        refreshCookie.setMaxAge(10 * 1440);
-                        //response.addHeader("Access-Control-Allow-Credentials", "true");
-                        response.addCookie(cookie);
-                        response.addCookie(refreshCookie);
-
-
-                        response.setContentType(APPLICATION_JSON_VALUE);
-                        new ObjectMapper().writeValue(response.getOutputStream(), authenticatedUser);
-
-                    /*} else {
-                        response.setHeader("Authorization Error", "Refresh Token is not valid");
-                        response.setStatus(FORBIDDEN.value());
-                        Map<String, String> error = new HashMap<>();
-                        error.put("error_message", "Refresh Token is not valid");
-                        response.setContentType(APPLICATION_JSON_VALUE);
-                        new ObjectMapper().writeValue(response.getOutputStream(), error);
-                    }
-*/
-
-                }
-
-            }catch (Exception authenticationException){
-                response.setHeader("Authorization Error", authenticationException.getMessage());
-                response.setStatus(FORBIDDEN.value());
-                Map<String, String> error = new HashMap<>();
-                error.put("error_message", authenticationException.getMessage());
-                response.setContentType(APPLICATION_JSON_VALUE);
-                new ObjectMapper().writeValue(response.getOutputStream(), error);
-
-            }
-
-        }else{
+        } else {
             response.setHeader("Authorization Error", "Refresh Token is missing");
             response.setStatus(FORBIDDEN.value());
             Map<String, String> error = new HashMap<>();
             error.put("error_message", "Refresh Token is missing");
             response.setContentType(APPLICATION_JSON_VALUE);
             new ObjectMapper().writeValue(response.getOutputStream(), error);
+
         }
     }
 
     @JsonView(Views.Public.class)
     @GetMapping(path = "/revoke")
-    public void revokeToken(HttpServletRequest request, HttpServletResponse response) throws IOException{
-        String authorizationHeader = request.getHeader(AUTHORIZATION);
-        String access_token = null;
-        for (Cookie cookie : request.getCookies()) {
-            if (cookie.getName().equals("jwt-token")) {
-                access_token = cookie.getValue();
-            }
-            //log.info("Cookie name: {} and value: {}", cookie.getName(), cookie.getValue());
-        }
-        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ") && access_token != null){
-
-            String auth_access_token = authorizationHeader.substring("Bearer ".length());
-            //log.info(auth_access_token);
+    public void revokeToken(HttpServletRequest request, HttpServletResponse response) throws IOException {
 
 
-            if (auth_access_token.equals(access_token)) {
-                //if (jwtService.findByRefreshToken(access_token) != null) {
-                    //log.info("I exist");
-                    //Long refreshTokenID = jwtService.findByRefreshToken(access_token).getId();
-                    //jwtService.deleteById(refreshTokenID);
+        if (authenticationService.authoriseUser(request.getHeader(AUTHORIZATION))) {
 
-                    Cookie cookie = new Cookie("jwt-token", null);
-                    cookie.setPath("/");
-                    cookie.setHttpOnly(true);
-                    cookie.setMaxAge(0);
-                    Cookie refreshCookie = new Cookie("refresh-token", null);
-                    refreshCookie.setPath("/");
-                    refreshCookie.setHttpOnly(true);
-                    refreshCookie.setMaxAge(0);
+            response.addCookie(authenticationService.generateExpiredAccessCookie());
+            response.addCookie(authenticationService.generateExpiredRefreshCookie());
 
+            response.setStatus(OK.value());
+            Map<String, String> result = new HashMap<>();
+            result.put("Status", "Refresh Token Revoked");
+            response.setContentType(APPLICATION_JSON_VALUE);
+            new ObjectMapper().writeValue(response.getOutputStream(), result);
 
-                    response.addCookie(cookie);
-                    response.addCookie(refreshCookie);
+        } else {
 
-                    response.setStatus(OK.value());
-                    Map<String, String> result = new HashMap<>();
-                    result.put("Status", "Refresh Token Revoked");
-                    response.setContentType(APPLICATION_JSON_VALUE);
-                    new ObjectMapper().writeValue(response.getOutputStream(), result);
-                //}
-            }else{
-                response.setHeader("Authorization Error", "Fake Refresh Token");
-                response.setStatus(FORBIDDEN.value());
-                Map<String, String> error = new HashMap<>();
-                error.put("error_message", "Refresh Token is not valid");
-                response.setContentType(APPLICATION_JSON_VALUE);
-                new ObjectMapper().writeValue(response.getOutputStream(), error);
-            }
-            //jwtService.findAll().forEach(token -> jwtService.deleteById(token.getId()));
-            // jwtService.findAll().forEach(token -> log.info("Token: {}", token));
-
-
-        }else{
             response.setHeader("Authorization Error", "Refresh Token is missing");
             response.setStatus(FORBIDDEN.value());
             Map<String, String> error = new HashMap<>();
@@ -204,5 +109,4 @@ public class TokenController {
             new ObjectMapper().writeValue(response.getOutputStream(), error);
         }
     }
-
 }

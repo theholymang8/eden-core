@@ -2,11 +2,10 @@ package com.core.rest.eden.configuration;
 
 import com.core.rest.eden.configuration.filter.CustomAuthenticationFilter;
 import com.core.rest.eden.configuration.filter.CustomAuthorizationFilter;
-import com.core.rest.eden.services.JWTService;
+import com.core.rest.eden.services.AuthenticationService;
 import com.core.rest.eden.services.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.CacheManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -16,16 +15,13 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
-import org.springframework.web.servlet.config.annotation.CorsRegistry;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import java.time.Duration;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -38,9 +34,9 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
     private final UserDetailsService userDetailsService;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
+    private final AuthenticationService authenticationService;
     private final UserService userService;
 
-    private final JWTService jwtService;
 
 
     @Autowired
@@ -76,11 +72,15 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
         /* Permit Resources */
         http
                 .authorizeRequests()
-                .antMatchers("/token/refresh/**", "/token/revoke/**")
+                .antMatchers(POST, "/users/register")
                 .permitAll();
         http
                 .authorizeRequests()
-                .antMatchers(GET, "/topics/")
+                .antMatchers(GET, "/token/refresh/**", "/token/revoke/**")
+                .permitAll();
+        http
+                .authorizeRequests()
+                .antMatchers(GET, "/topics")
                 .permitAll();
         http
                 .authorizeRequests()
@@ -97,9 +97,9 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .authenticated();
 
         http
-                .addFilter(new CustomAuthenticationFilter(authenticationManagerBean(), userService, jwtService));
+                .addFilter(new CustomAuthenticationFilter(authenticationManagerBean(), authenticationService, userService));
         http
-                .addFilterBefore(new CustomAuthorizationFilter(), UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(new CustomAuthorizationFilter(authenticationService), UsernamePasswordAuthenticationFilter.class);
 
     }
 
@@ -119,6 +119,10 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
         return new CorsFilter(source);
     }
 
+    @Bean
+    public PasswordEncoder encoder() {
+        return new BCryptPasswordEncoder();
+    }
 
     public AuthenticationManager authenticationManagerBean() throws Exception {
         return super.authenticationManagerBean();

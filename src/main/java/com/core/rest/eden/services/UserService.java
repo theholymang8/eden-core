@@ -4,6 +4,7 @@ import com.core.rest.eden.domain.Post;
 import com.core.rest.eden.domain.Role;
 import com.core.rest.eden.domain.Topic;
 import com.core.rest.eden.domain.User;
+import com.core.rest.eden.transfer.DTO.UserRegisterDTO;
 import com.core.rest.eden.transfer.DTO.UserView;
 
 import java.util.List;
@@ -31,6 +32,8 @@ public interface UserService extends BaseService<User, Long>{
     List<User> findFriends(User user);
 
     List<Post> findFriendsPosts(String username, Integer limit);
+
+    User registerUser(UserRegisterDTO user);
 
     //List<Post> findFriendsPostsPageable(String username, Integer limit);
 

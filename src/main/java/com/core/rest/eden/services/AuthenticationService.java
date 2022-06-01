@@ -1,5 +1,7 @@
 package com.core.rest.eden.services;
 
+import com.core.rest.eden.transfer.DTO.UserView;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 
@@ -8,15 +10,31 @@ import java.util.Collection;
 
 public interface AuthenticationService {
 
+    Cookie generateExpiredAccessCookie();
+
+    Cookie generateExpiredRefreshCookie();
+
+    String generateAccessToken(User user, String issuer);
+
+    String generateRefreshToken(User user, String issuer);
+
+    String generateAccessToken(com.core.rest.eden.domain.User user, String issuer);
+
+    String generateRefreshToken(com.core.rest.eden.domain.User user, String issuer);
+
     String extractToken(String authHeader);
 
     Boolean authoriseUser(String authHeader);
 
+    String extractTokenFromCookie(Cookie[] cookies, String value);
+
+    String provideUser(String token);
+
     Boolean validateCookie(Cookie[] cookies, String value);
 
-    Cookie generateAccessCookie(User user, String issuer);
+    Cookie generateAccessCookie(String accessToken);
 
-    Cookie generateRefreshCookie(User user, String issuer);
+    Cookie generateRefreshCookie(String refreshToken);
 
     Boolean validateToken(String authHeader);
 
