@@ -130,47 +130,7 @@ public class TopicsFactory extends AbstractLogComponent implements CommandLineRu
                   .build()
         );
 
-        topics.forEach(topic -> logger.info("Topic : {}", topic));
-
-        if (!users.isEmpty()) {
-            logger.info("I exist.");
-            topics.get(0).setUsers(Set.of(users.get(0)));
-
-            topics.get(1).setUsers(Set.of(users.get(0)));
-
-            topics.get(2).setUsers(Set.of(users.get(1)));
-
-            topics.get(3).setUsers(Set.of(users.get(1)));
-
-            topics.get(4).setUsers(Set.of(users.get(2)));
-
-            topics.get(5).setUsers(Set.of(users.get(2)));
-
-            topics.get(6).setUsers(Set.of(users.get(3)));
-
-            topics.get(7).setUsers(Set.of(users.get(3)));
-
-            topics.get(8).setUsers(Set.of(users.get(4)));
-
-            topics.get(9).setUsers(Set.of(users.get(4)));
-
-            topics.get(10).setUsers(Set.of(users.get(1)));
-
-            topics.get(11).setUsers(Set.of(users.get(1)));
-
-            topics.get(12).setUsers(Set.of(users.get(1)));
-
-            topics.get(13).setUsers(Set.of(users.get(0)));
-
-            topics.get(14).setUsers(Set.of(users.get(0)));
-
-            topics.get(15).setUsers(Set.of(users.get(2)));
-
-            topics.get(16).setUsers(Set.of(users.get(2)));
-
-            topics.get(17).setUsers(Set.of(users.get(3)));
-
-        }
+        //topics.forEach(topic -> logger.info("Topic : {}", topic));
 
         logger.info("Created {} topics", topics.size());
 

@@ -12,4 +12,6 @@ public interface TopicService extends BaseService<Topic, Long>{
 
     Set<Topic> findByUsers(List<User> users);
 
+    void updateUsers(Set<Topic> topics, User user);
+
 }

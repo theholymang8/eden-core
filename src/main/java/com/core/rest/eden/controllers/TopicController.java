@@ -30,14 +30,14 @@ public class TopicController extends AbstractController<Topic>{
         return topicService;
     }
 
-    @GetMapping(path = "find", headers = "action=findByUsers")
+    /*@GetMapping(path = "find", headers = "action=findByUsers")
     public ResponseEntity<ApiResponse<Set<Topic>>> findByUsers(@RequestParam List<String> users){
         List<User> userList = new ArrayList<>();
         users.forEach(username -> userList.add(userService.findByUsername(username)));
         return ResponseEntity.ok(ApiResponse.<Set<Topic>>builder()
                 .data(topicService.findByUsers(userList))
                 .build());
-    }
+    }*/
 
     @GetMapping(path = "find", headers = "action=findByTitle")
     public ResponseEntity<ApiResponse<Topic>> findByTitle(@RequestParam String title){

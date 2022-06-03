@@ -9,4 +9,6 @@ public interface FileService extends BaseService<File, Long> {
 
     void save(MultipartFile file) throws IOException;
 
+    File findByName(String name);
+
 }

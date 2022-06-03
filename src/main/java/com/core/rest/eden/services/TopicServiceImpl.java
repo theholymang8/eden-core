@@ -43,4 +43,19 @@ public class TopicServiceImpl extends BaseServiceImpl<Topic> implements TopicSer
         }
         return foundTopics;
     }
+
+    @Override
+    public void updateUsers(Set<Topic> topics, User user) {
+        topics.forEach(topic -> {
+            if(topic.getUsers() == null){
+                logger.info("Topics have no users");
+                topic.setUsers(Set.of(user));
+            }else{
+                topic.getUsers().add(user);
+                logger.info("Topics have users");
+            }
+            //topicRepository.save(topic);
+        });
+
+    }
 }

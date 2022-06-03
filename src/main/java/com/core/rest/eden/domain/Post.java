@@ -46,8 +46,14 @@ public class Post extends BaseModel implements Comparable<Post>{
     @JsonView(Views.Public.class)
     private Integer likes;
 
-    @ManyToMany(mappedBy = "posts",
-            fetch = FetchType.EAGER
+    @ManyToMany(
+            cascade = {CascadeType.REFRESH, CascadeType.DETACH},
+            fetch = FetchType.EAGER)
+    @JoinTable(name = "`POST_TOPICS`",
+            joinColumns = @JoinColumn(name = "`post_id`"),
+            foreignKey = @ForeignKey(name = "post_id"),
+            inverseJoinColumns = @JoinColumn(name = "`topic_id`"),
+            inverseForeignKey = @ForeignKey(name = "topic_id")
     )
     @JsonView(Views.Detailed.class)
     private Set<Topic> topics = new HashSet<>();

@@ -34,7 +34,7 @@ public class TopicBinders  extends AbstractLogComponent implements CommandLineRu
         topics.forEach(topic -> {
             Collections.shuffle(users);
             Collections.shuffle(posts);
-            topic.setUsers(Set.of(users.get(0), users.get(1), users.get(2), users.get(3)));
+            //topic.setUsers(Set.of(users.get(0), users.get(1), users.get(2), users.get(3)));
             topic.setPosts(Set.of(posts.get(0)));
             logger.info("Topic: {}", topic);
             topicService.update(topic);

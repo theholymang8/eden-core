@@ -75,6 +75,13 @@ public class User extends BaseModel{
     )
     private Set<File> files;
 
+    @OneToOne(
+            mappedBy = "userAvatar",
+            cascade = {CascadeType.ALL}
+    )
+    @JsonView(Views.Detailed.class)
+    private File avatar;
+
     @NotNull(message = "{roles.null}")
     @ElementCollection(fetch = FetchType.EAGER, targetClass=Role.class)
     @Enumerated(EnumType.STRING)
@@ -84,8 +91,10 @@ public class User extends BaseModel{
     private Set<Role> roles = new HashSet<>();
 
 
-    @ManyToMany(mappedBy = "users",
-                fetch = FetchType.EAGER
+    @ManyToMany(
+            mappedBy = "users",
+            cascade = {CascadeType.REFRESH, CascadeType.MERGE, CascadeType.DETACH},
+            fetch = FetchType.EAGER
     )
     @JsonView(Views.Detailed.class)
     private Set<Topic> topics = new HashSet<>();

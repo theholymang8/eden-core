@@ -63,7 +63,7 @@ public class UserController extends AbstractController<User>{
                 .build());
     }
 
-    @JsonView(Views.Public.class)
+    /*@JsonView(Views.Public.class)
     @GetMapping(
             headers = "action=findTopicRelated",
             params = {"username", "limit"})
@@ -73,7 +73,7 @@ public class UserController extends AbstractController<User>{
         return ResponseEntity.ok(ApiResponse.<List<Post>>builder()
                 .data(userService.findTopicRelatedPosts(usernames, limit))
                 .build());
-    }
+    }*/
 
     @JsonView(Views.Public.class)
     @GetMapping(

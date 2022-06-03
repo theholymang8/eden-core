@@ -46,20 +46,16 @@ public class Topic extends BaseModel{
     @JsonView(Views.Detailed.class)
     private LocalDateTime dateUpdated;
 
-    @ManyToMany(
-            cascade = {CascadeType.REFRESH, CascadeType.DETACH},
-            fetch = FetchType.EAGER)
-    @JoinTable(name = "`POST_TOPICS`",
-            joinColumns = @JoinColumn(name = "`post_id`"),
-            foreignKey = @ForeignKey(name = "post_id"),
-            inverseJoinColumns = @JoinColumn(name = "`topic_id`"),
-            inverseForeignKey = @ForeignKey(name = "topic_id")
+    @ManyToMany(mappedBy = "topics",
+            cascade = CascadeType.ALL,
+            fetch = FetchType.EAGER
     )
     @JsonView(Views.Detailed.class)
     private Set<Post> posts = new HashSet<>();
 
+
     @ManyToMany(
-            cascade = {CascadeType.REFRESH, CascadeType.DETACH},
+            cascade = {CascadeType.REFRESH, CascadeType.MERGE, CascadeType.DETACH},
             fetch = FetchType.EAGER)
     @JoinTable(name = "`USER_TOPICS`",
             joinColumns = @JoinColumn(name = "`user_id`"),

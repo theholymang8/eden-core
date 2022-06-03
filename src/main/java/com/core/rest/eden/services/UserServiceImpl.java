@@ -6,13 +6,11 @@ import com.core.rest.eden.repositories.UserRepository;
 import com.core.rest.eden.transfer.DTO.UserRegisterDTO;
 import com.core.rest.eden.transfer.DTO.UserView;
 import lombok.RequiredArgsConstructor;
-import org.hibernate.annotations.Type;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Base64Utils;
@@ -117,24 +115,13 @@ public class UserServiceImpl extends BaseServiceImpl<User> implements UserServic
                 .subList(0, limit);
     }
 
+    @Transactional
     @Override
     public User registerUser(UserRegisterDTO user) throws UserAlreadyExistsException, NullPointerException{
         /* Check for duplicate emails and username */
         if(emailExist(user.getEmail()) || usernameExist(user.getUserName())){
             throw new UserAlreadyExistsException("An account with this username/email already exists", new Exception("Custom Authentication Exception"));
         }
-        /* Decode User's Avatar from base64 format */
-        logger.info("User's image is: {}", user.getAvatar());
-        byte[] fileBytes = Base64Utils.decodeFromString(user.getAvatar().getBase64());
-
-        File avatar = File.builder()
-                .name(user.getAvatar().getName())
-                .contentType(user.getAvatar().getContentType())
-                .data(fileBytes)
-                .size(user.getAvatar().getSize())
-                .build();
-
-
 
         User newUser = User.builder()
                 .firstName(user.getFirstName())
@@ -145,18 +132,39 @@ public class UserServiceImpl extends BaseServiceImpl<User> implements UserServic
                 .dateOfBirth(user.getDateOfBirth())
                 .gender(user.getGender())
                 .about(user.getAbout())
-                .avatar(avatar)
                 .roles(Set.of(Role.USER))
-                .topics(user.getTopics())
                 .build();
 
+        File avatar;
+        /* Decode User's Avatar from base64 format */
+        //logger.info("User's image is: {}", user.getAvatar());
+        if (user.getAvatar()!=null) {
+            byte[] fileBytes = Base64Utils.decodeFromString(user.getAvatar().getBase64());
 
-        avatar.setUser(newUser);
+            avatar = File.builder()
+                    .name(user.getAvatar().getName())
+                    .contentType(user.getAvatar().getContentType())
+                    .data(fileBytes)
+                    .size(user.getAvatar().getSize())
+                    .build();
 
-        fileService.create(avatar);
-        //logger.info("")
+            avatar.setUser(newUser);
+            newUser.setAvatar(avatar);
+        }
+        if (user.getTopics()!=null){
+            Set<Topic> chosenTopics = new HashSet<>();
+            user.getTopics().forEach(topic -> {
+                chosenTopics.add(topicService.findByTitle(topic.getTitle()));
+            });
+            logger.info("Topics: {}", chosenTopics);
+            newUser.setTopics(chosenTopics);
+            topicService.updateUsers(chosenTopics, newUser);
+        }
 
-        logger.info("New User has registered: {}", user);
+
+
+
+        logger.info("New User has registered: {} {} {} {}", user.getFirstName(), user.getEmail(), user.getTopics(), user.getAbout());
         return userRepository.save(newUser);
     }
 

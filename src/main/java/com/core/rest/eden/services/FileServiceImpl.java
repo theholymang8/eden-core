@@ -31,4 +31,9 @@ public class FileServiceImpl extends BaseServiceImpl<File> implements FileServic
 
         fileRepository.save(fileEntity);
     }
+
+    @Override
+    public File findByName(String name) {
+        return fileRepository.findByName(name);
+    }
 }
