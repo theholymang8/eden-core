@@ -20,8 +20,8 @@ import java.util.Set;
 @AllArgsConstructor
 @NoArgsConstructor
 @SuperBuilder
-@ToString(callSuper = true, exclude = {"groups", "comment"})
-@EqualsAndHashCode(callSuper = true, exclude = {"groups", "comment"})
+@ToString(callSuper = true, exclude = {"groups", "comment", "files"})
+@EqualsAndHashCode(callSuper = true, exclude = {"groups", "comment", "files"})
 @Data
 
 @Entity
@@ -77,7 +77,7 @@ public class User extends BaseModel{
 
     @OneToMany(
             cascade = {CascadeType.MERGE, CascadeType.REFRESH, CascadeType.DETACH},
-            fetch = FetchType.EAGER,
+            fetch = FetchType.LAZY,
             mappedBy = "user"
     )
     private Set<File> files;
@@ -85,7 +85,7 @@ public class User extends BaseModel{
     @OneToOne(
             mappedBy = "userAvatar",
             cascade = {CascadeType.ALL},
-            fetch = FetchType.EAGER
+            fetch = FetchType.LAZY
     )
     @JsonView(Views.Detailed.class)
     private File avatar;
@@ -102,22 +102,24 @@ public class User extends BaseModel{
     @ManyToMany(
             mappedBy = "users",
             cascade = {CascadeType.REFRESH, CascadeType.MERGE, CascadeType.DETACH},
-            fetch = FetchType.EAGER
+            fetch = FetchType.LAZY
     )
     @JsonView(Views.Detailed.class)
     private Set<Topic> topics = new HashSet<>();
 
 
     @OneToMany(cascade = {CascadeType.MERGE, CascadeType.REFRESH, CascadeType.DETACH},
-            fetch = FetchType.EAGER,
+            fetch = FetchType.LAZY,
             mappedBy = "user")
     @JsonView(Views.Detailed.class)
     private Set<Post> posts = new HashSet<>();
 
 
-    @OneToOne(mappedBy = "user")
+    /*@OneToOne(
+            fetch = FetchType.LAZY,
+            mappedBy = "user")
     @JsonView(Views.Internal.class)
-    private Comment comment;
+    private Comment comment;*/
 
     @ManyToMany(mappedBy = "members", fetch = FetchType.LAZY)
     @JsonView(Views.Detailed.class)

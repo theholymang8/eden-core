@@ -36,8 +36,9 @@ public class TopicServiceImpl extends BaseServiceImpl<Topic> implements TopicSer
             //String[] nameSplit = user.split("\\s+");
             //User foundUser = userService.findByName(nameSplit[0], nameSplit[1]);
             //User foundUser = userService.findByUsername(username);
+            logger.info("User: {}", user);
             if (user != null){
-                logger.trace("Found Topics for User : {} ", user);
+                //logger.trace("Found Topics for User : {} ", user);
                 foundTopics.addAll(topicRepository.findAllByUsers(user));
             }
         }

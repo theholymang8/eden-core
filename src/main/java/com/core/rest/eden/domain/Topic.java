@@ -57,7 +57,7 @@ public class Topic extends BaseModel{
 
     @ManyToMany(
             cascade = {CascadeType.REFRESH, CascadeType.DETACH},
-            fetch = FetchType.EAGER)
+            fetch = FetchType.LAZY)
     @JoinTable(name = "`POST_TOPICS`",
             joinColumns = @JoinColumn(name = "`topic_id`"),
             foreignKey = @ForeignKey(name = "topic_id"),
@@ -70,7 +70,7 @@ public class Topic extends BaseModel{
 
     @ManyToMany(
             cascade = {CascadeType.REFRESH, CascadeType.DETACH},
-            fetch = FetchType.EAGER)
+            fetch = FetchType.LAZY)
     @JoinTable(name = "`USER_TOPICS`",
             joinColumns = @JoinColumn(name = "`topic_id`"),
             foreignKey = @ForeignKey(name = "topic_id"),

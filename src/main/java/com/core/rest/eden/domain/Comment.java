@@ -46,6 +46,10 @@ public class Comment extends BaseModel{
 
     @OneToOne
     @JsonView(Views.Public.class)
+    @Getter(AccessLevel.NONE)
     private User user;
 
+    public String getUser() {
+        return this.user.getUsername();
+    }
 }

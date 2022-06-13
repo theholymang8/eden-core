@@ -1,5 +1,6 @@
 package com.core.rest.eden.base;
 
+import com.core.rest.eden.domain.Post;
 import com.core.rest.eden.domain.User;
 import com.core.rest.eden.services.UserService;
 import lombok.RequiredArgsConstructor;
@@ -20,8 +21,15 @@ public class UsersTesting extends AbstractLogComponent implements CommandLineRun
     public void run(String... args) throws Exception {
         List<User> users = userService.findAll();
         users.forEach(user -> logger.info("User: {}", user.getTopics()));
+        logger.info("Found User: {}",users.get(0));
+        users.get(0).getPosts().forEach(post -> logger.info("Post: {}", post));
+        //userService.find(1L).getTopics().forEach(topic -> logger.info("User has these topics: {}"));
 
-        userService.find(1L).getTopics().forEach(topic -> logger.info("User has these topics: {}"));
+        /*List<Post> posts = userService.findTopicRelatedPosts(List.of("ganast"), 10);
+
+        posts.forEach(post -> {
+            logger.info("Post: {}", post);
+        });*/
 
     }
 }

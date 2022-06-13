@@ -1,16 +1,20 @@
 package com.core.rest.eden.services;
 
+import com.core.rest.eden.domain.File;
 import com.core.rest.eden.domain.Post;
 import com.core.rest.eden.domain.Topic;
 import com.core.rest.eden.domain.User;
 import com.core.rest.eden.repositories.PostRepository;
 import com.core.rest.eden.transfer.DTO.CommentView;
+import com.core.rest.eden.transfer.DTO.PostDTO;
 import com.core.rest.eden.transfer.DTO.UserPostView;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.util.Base64Utils;
+import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -23,9 +27,16 @@ public class PostServiceImpl extends BaseServiceImpl<Post> implements PostServic
 
     private final CommentService commentService;
 
+    private final FileService fileService;
+
     @Override
     public JpaRepository<Post, Long> getRepository() {
         return postRepository;
+    }
+
+    @Override
+    public Post findById(Long id) {
+        return postRepository.findByIdCustom(id);
     }
 
     @Override
@@ -54,13 +65,36 @@ public class PostServiceImpl extends BaseServiceImpl<Post> implements PostServic
     }*/
 
     @Override
-    public void addLike(Long id) throws NoSuchElementException{
+    public Post addLike(Long id) throws NoSuchElementException{
         Post foundPost = postRepository.getById(id);
         //Post foundPost = postRepository.findById(id).orElseThrow(NoSuchElementException::new);
-        logger.info("Found Post: {}", foundPost);
         foundPost.setLikes(foundPost.getLikes()+1);
-        // logger.info("post has: {} likes", post.getLikes());
-        postRepository.save(foundPost);
+        return postRepository.save(foundPost);
+    }
+
+    @Override
+    public Post uploadPost(PostDTO entity) {
+        Post newPost = Post.builder()
+                .dateCreated(entity.getDateCreated())
+                .body(entity.getBody())
+                .likes(0)
+                .build();
+
+        if(entity.getImage()!=null){
+            byte[] fileBytes = Base64Utils.decodeFromString(entity.getImage().getBase64());
+
+            File fileEntity = File.builder()
+                    .name(StringUtils.cleanPath(entity.getImage().getName()))
+                    .contentType(entity.getImage().getContentType())
+                    .data(fileBytes)
+                    .build();
+            newPost.setImage(fileEntity);
+            /*fileEntity.setPost(newPost);
+            fileService.create(fileEntity);*/
+        }
+        postRepository.save(newPost);
+        return newPost;
+
     }
 
     @Override

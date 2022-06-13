@@ -53,7 +53,8 @@ public class File extends BaseModel {
     @JsonView(Views.Detailed.class)
     private User userAvatar;
 
-    @ManyToOne
+    //@MapsId
+    @OneToOne(mappedBy = "image")
     @JsonView(Views.Internal.class)
     private Post post;
 
@@ -61,6 +62,7 @@ public class File extends BaseModel {
     public String getData() {
         String encodedImage = Base64.getEncoder().encodeToString(this.data);
         return encodedImage;
+        //return "";
     }
 
 }

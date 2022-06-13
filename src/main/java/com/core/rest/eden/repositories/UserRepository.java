@@ -11,11 +11,16 @@ import java.util.List;
 
 public interface UserRepository extends JpaRepository<User, Long> {
 
+    @Override
+    @Query(value = "select distinct u from User u left join fetch u.topics left join fetch u.files left join fetch u.posts")
+    List<User> findAll();
+
     @Query
     User findByFirstNameAndLastName(String firstName, String lastName);
 
     User findByEmail(String email);
 
+    @Query(value = "from User u where u.username=:username")
     User findByUsername(String username);
 
     @Query(value = "select new com.core.rest.eden.transfer.DTO.UserView(u.id, u.firstName, u.lastName, u.username, '', '', 0L, 0L) from User u where u.username = :username")

@@ -6,20 +6,28 @@ import com.core.rest.eden.domain.User;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.stereotype.Repository;
 
+import javax.persistence.NamedQuery;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-public interface PostRepository extends JpaRepository<Post, Long> {
+@Repository
+public interface PostRepository extends JpaRepository<Post, Long>, CustomPostRepository {
 
     /*@Override
-    @Query(value = "select p from Post p join fetch p.files  join fetch p.topics  join fetch p.user where p.id = :id")
+    @Query(value = "select p from Post p join fetch p.topics left join p.comments where p.id = :id")
     Optional<Post> findById(Long id);*/
 
+
+    Post findByIdCustom(Long id);
+
+    @Query(value = "select distinct p from Post p where p.user = :user")
     List<Post> findAllByUser(User user, Pageable pageable);
 
     Post findByUser(User user);
 
+    //@Query(value = "select distinct p from Post p left join fetch p.topics where p.topics IN :topics")
     List<Post> findDistinctAllByTopicsIn(Set<Topic> topics, Pageable pageable);
 }

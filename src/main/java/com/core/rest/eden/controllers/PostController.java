@@ -8,10 +8,12 @@ import com.core.rest.eden.services.BaseService;
 import com.core.rest.eden.services.FileService;
 import com.core.rest.eden.services.PostService;
 import com.core.rest.eden.services.UserService;
+import com.core.rest.eden.transfer.DTO.PostDTO;
 import com.core.rest.eden.utility.TokenUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.Base64Utils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -37,9 +39,17 @@ public class PostController extends AbstractController<Post>{
         return postService;
     }
 
+    @PostMapping(path = "upload")
+    public ResponseEntity<ApiResponse<Post>> createWithImageDto(@Valid @RequestBody final PostDTO entity) {
+        return ResponseEntity.ok(ApiResponse.<Post>builder()
+                .data(postService.uploadPost(entity))
+                .build());
+    }
 
-    @PostMapping(path = "upload", consumes = "multipart/form-data")
+    /*@PostMapping(path = "upload", consumes = "multipart/form-data")
     public ResponseEntity<ApiResponse<Post>> createWithImage(@Valid @RequestPart("entity") final Post entity, @RequestPart("file") MultipartFile multipartFile, @RequestPart("username") String username) throws NullPointerException, IOException {
+
+
 
         User postUser = this.userService.findByUsername(username);
         entity.setUser(postUser);
@@ -76,7 +86,7 @@ public class PostController extends AbstractController<Post>{
 
         return new ResponseEntity<>(ApiResponse.<Post>builder().data(entity).build(),
                 getNoCacheHeaders(), HttpStatus.CREATED);
-    }
+    }*/
 
     @GetMapping(path = "find",
                 headers = "action=findRecentPosts",
@@ -98,8 +108,9 @@ public class PostController extends AbstractController<Post>{
 
     @PutMapping(path = "like",
     params = {"postId"})
-    public void addLike(@RequestParam(value = "postId") Long postId){
-        postService.addLike(postId);
+    public ResponseEntity<ApiResponse<Post>> addLike(@RequestParam(value = "postId") Long postId){
+        return new ResponseEntity<>(ApiResponse.<Post>builder().data(postService.addLike(postId)).build(),
+                getNoCacheHeaders(), HttpStatus.CREATED);
     }
 
     /*@PutMapping(path = "likev2")

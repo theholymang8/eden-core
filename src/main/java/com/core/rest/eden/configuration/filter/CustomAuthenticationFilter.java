@@ -1,13 +1,18 @@
 package com.core.rest.eden.configuration.filter;
 
+import com.core.rest.eden.controllers.transfer.ApiError;
+import com.core.rest.eden.controllers.transfer.ApiResponse;
 import com.core.rest.eden.services.AuthenticationService;
 import com.core.rest.eden.services.UserService;
 import com.core.rest.eden.transfer.DTO.UserView;
 import com.core.rest.eden.transfer.views.Views;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.Builder;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -22,6 +27,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Date;
+import java.util.Map;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
@@ -65,5 +71,18 @@ public class CustomAuthenticationFilter extends UsernamePasswordAuthenticationFi
         response.setContentType(APPLICATION_JSON_VALUE);
         new ObjectMapper().writeValue(response.getOutputStream(), authenticatedUser);
 
+    }
+
+    @Override
+    protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response, AuthenticationException failed) throws ServletException, IOException {
+        ResponseEntity authenticationError =  new ResponseEntity<>(ApiResponse.<String>builder()
+                //.data("A user with this username/email already exists")
+                .apiError(ApiError.builder()
+                        .message("Incorrect Username or Password")
+                        .build())
+                .build(), HttpStatus.UNAUTHORIZED);
+        response.setContentType(APPLICATION_JSON_VALUE);
+        response.setStatus(401);
+        new ObjectMapper().writeValue(response.getOutputStream(), "Incorrect Username or Password");
     }
 }

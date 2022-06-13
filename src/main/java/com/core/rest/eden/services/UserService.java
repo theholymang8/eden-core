@@ -27,6 +27,7 @@ public interface UserService extends BaseService<User, Long>{
 
     User saveUser(User user);
 
+
     User loadUserByEmail(String username);
 
     List<User> findFriends(User user);
