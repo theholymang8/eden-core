@@ -39,11 +39,8 @@ public class PostController extends AbstractController<Post>{
 
 
     @PostMapping(path = "upload", consumes = "multipart/form-data")
-    public ResponseEntity<ApiResponse<Post>> createWithImage(@Valid @RequestPart("entity") final Post entity, @RequestPart("file") MultipartFile multipartFile, HttpServletRequest request) throws NullPointerException, IOException {
+    public ResponseEntity<ApiResponse<Post>> createWithImage(@Valid @RequestPart("entity") final Post entity, @RequestPart("file") MultipartFile multipartFile, @RequestPart("username") String username) throws NullPointerException, IOException {
 
-        Map<String,String> tokens = TokenUtil.extractTokensFromCookie(request.getCookies());
-        Map<String,String> tokenDetails = TokenUtil.decodeToken(tokens.get("access-token"));
-        String username = tokenDetails.get("username");
         User postUser = this.userService.findByUsername(username);
         entity.setUser(postUser);
 
@@ -69,11 +66,9 @@ public class PostController extends AbstractController<Post>{
     @PostMapping(path = "upload",
     headers = "action=uploadSimple",
     consumes = "application/json")
-    public ResponseEntity<ApiResponse<Post>> createSimple(@Valid @RequestBody final Post entity, HttpServletRequest request) {
+    public ResponseEntity<ApiResponse<Post>> createSimple(@Valid @RequestBody final Post entity, @RequestPart("username") String username) {
 
-        Map<String,String> tokens = TokenUtil.extractTokensFromCookie(request.getCookies());
-        Map<String,String> tokenDetails = TokenUtil.decodeToken(tokens.get("access-token"));
-        String username = tokenDetails.get("username");
+        logger.info("Username is: {}", username);
         User postUser = this.userService.findByUsername(username);
         entity.setUser(postUser);
 
@@ -92,14 +87,25 @@ public class PostController extends AbstractController<Post>{
                 .build());
     }
 
-    /*@PutMapping(path = "like",
+    /*@GetMapping(path = "find",
+            headers = "action=findTopicRelated",
+            params = "limit")
+    public ResponseEntity<ApiResponse<List<Post>>> findTopicRelatedPosts(@RequestParam(value = "limit", defaultValue = "10") Integer limit){
+        return ResponseEntity.ok(ApiResponse.<List<Post>>builder()
+                .data(postService.findRecentPosts(limit))
+                .build());
+    }*/
+
+    @PutMapping(path = "like",
     params = {"postId"})
     public void addLike(@RequestParam(value = "postId") Long postId){
         postService.addLike(postId);
-    }*/
-
-    @PutMapping(path = "likev2")
-    public void addLikeV2(@Valid @RequestBody final Post post){
-        postService.addLikev2(post);
     }
+
+    /*@PutMapping(path = "likev2")
+    public void addLikeV2(@Valid @RequestBody final Post post){
+
+        logger.info("Post is: {}", post);
+        postService.addLikev2(post);
+    }*/
 }

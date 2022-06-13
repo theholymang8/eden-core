@@ -2,6 +2,12 @@ package com.core.rest.eden.domain;
 
 import com.core.rest.eden.transfer.views.Views;
 import com.fasterxml.jackson.annotation.*;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
+import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
+import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
+import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
@@ -14,15 +20,14 @@ import java.util.Set;
 @AllArgsConstructor
 @NoArgsConstructor
 @SuperBuilder
-@ToString(callSuper = true, exclude = {"groups", "comment", "files", "topics"})
-@EqualsAndHashCode(callSuper = true, exclude = {"groups", "comment", "files", "topics"})
+@ToString(callSuper = true, exclude = {"groups", "comment"})
+@EqualsAndHashCode(callSuper = true, exclude = {"groups", "comment"})
 @Data
 
 @Entity
 @Table(name = "USERS")
 
 @JsonIgnoreProperties(value = {"groups", "user", "comment"})
-
 
 @SequenceGenerator(name = "idGenerator", sequenceName = "USER_SEQ", allocationSize = 1)
 public class User extends BaseModel{
@@ -46,6 +51,8 @@ public class User extends BaseModel{
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     @Column(nullable = false)
     @JsonView(Views.Detailed.class)
+    @JsonSerialize(using = LocalDateSerializer.class)
+    @JsonDeserialize(using = LocalDateDeserializer.class)
     private LocalDate dateOfBirth;
 
     @NotNull(message = "{email.null}")
@@ -77,7 +84,8 @@ public class User extends BaseModel{
 
     @OneToOne(
             mappedBy = "userAvatar",
-            cascade = {CascadeType.ALL}
+            cascade = {CascadeType.ALL},
+            fetch = FetchType.EAGER
     )
     @JsonView(Views.Detailed.class)
     private File avatar;

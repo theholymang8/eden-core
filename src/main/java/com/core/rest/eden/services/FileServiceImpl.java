@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.transaction.Transactional;
 import java.io.IOException;
 
 @RequiredArgsConstructor
@@ -32,6 +33,7 @@ public class FileServiceImpl extends BaseServiceImpl<File> implements FileServic
         fileRepository.save(fileEntity);
     }
 
+    @Transactional
     @Override
     public File findByName(String name) {
         return fileRepository.findByName(name);

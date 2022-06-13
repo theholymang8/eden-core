@@ -4,9 +4,11 @@ import com.core.rest.eden.controllers.transfer.ApiResponse;
 import com.core.rest.eden.domain.Post;
 import com.core.rest.eden.domain.Role;
 import com.core.rest.eden.domain.User;
+import com.core.rest.eden.services.AuthenticationService;
 import com.core.rest.eden.services.BaseService;
 import com.core.rest.eden.services.UserService;
 import com.core.rest.eden.transfer.DTO.UserRegisterDTO;
+import com.core.rest.eden.transfer.DTO.UserView;
 import com.core.rest.eden.transfer.views.Views;
 import com.fasterxml.jackson.annotation.JsonView;
 import lombok.RequiredArgsConstructor;
@@ -14,6 +16,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.util.*;
 
@@ -24,17 +28,11 @@ import java.util.*;
 public class UserController extends AbstractController<User>{
 
     private final UserService userService;
+    private final AuthenticationService authenticationService;
 
     @Override
     protected BaseService<User, Long> getBaseService() {
         return userService;
-    }
-
-    @PostMapping("/register")
-    @JsonView(Views.Detailed.class)
-    public ResponseEntity<ApiResponse<User>> create(@Valid @RequestBody final UserRegisterDTO entity) {
-        return new ResponseEntity<>(ApiResponse.<User>builder().data(userService.registerUser(entity)).build(),
-                getNoCacheHeaders(), HttpStatus.CREATED);
     }
 
     @JsonView(Views.Detailed.class)
@@ -63,7 +61,7 @@ public class UserController extends AbstractController<User>{
                 .build());
     }
 
-    /*@JsonView(Views.Public.class)
+    @JsonView(Views.Public.class)
     @GetMapping(
             headers = "action=findTopicRelated",
             params = {"username", "limit"})
@@ -73,7 +71,7 @@ public class UserController extends AbstractController<User>{
         return ResponseEntity.ok(ApiResponse.<List<Post>>builder()
                 .data(userService.findTopicRelatedPosts(usernames, limit))
                 .build());
-    }*/
+    }
 
     @JsonView(Views.Public.class)
     @GetMapping(
@@ -84,6 +82,17 @@ public class UserController extends AbstractController<User>{
             @RequestParam Integer limit){
         return ResponseEntity.ok(ApiResponse.<List<Post>>builder()
                 .data(userService.findPostsByUsername(username, limit))
+                .build());
+    }
+
+    @JsonView(Views.Detailed.class)
+    @GetMapping(
+            headers = "action=findUserProfile",
+            params = {"username"})
+    public ResponseEntity<ApiResponse<User>> findUserProfile(
+            @Valid @RequestParam("username") String username){
+        return ResponseEntity.ok(ApiResponse.<User>builder()
+                .data(userService.findByUsername(username))
                 .build());
     }
 

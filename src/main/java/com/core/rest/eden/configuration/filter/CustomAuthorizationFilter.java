@@ -25,17 +25,17 @@ public class CustomAuthorizationFilter extends OncePerRequestFilter {
     private final AuthenticationService authenticationService;
 
     private final Set<String> excludedUrlPatterns = new HashSet<>(Arrays.asList(
-            "/token/revoke/",
-            "/users/register",
+            "/auth/token/revoke/",
+            "/auth/register",
             "/login",
-            "/token/refresh/",
+            "/auth/token/refresh/",
             "/topics"
     ));
     private final AntPathMatcher pathMatcher = new AntPathMatcher();
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        if (authenticationService.authoriseUser(request.getHeader(AUTHORIZATION))){
+        if (authenticationService.authoriseUser(request.getCookies(), "access-token")){
             filterChain.doFilter(request,response);
         }else {
             response.setHeader("Authorization Error", "Not Authorised");

@@ -8,6 +8,8 @@ import lombok.*;
 import lombok.experimental.SuperBuilder;
 
 import javax.persistence.*;
+import java.io.ByteArrayOutputStream;
+import java.util.Base64;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -19,7 +21,7 @@ import javax.persistence.*;
 @Entity
 @Table(name = "FILES")
 
-//@JsonIgnoreProperties(value = {"groups", "user", "comment"})
+@JsonIgnoreProperties(value = {"userAvatar", "user", "post"})
 
 @SequenceGenerator(name = "idGenerator", sequenceName = "FILE_SEQ", allocationSize = 1)
 public class File extends BaseModel {
@@ -33,9 +35,9 @@ public class File extends BaseModel {
     @JsonView(Views.Public.class)
     private Long size;
 
-    @JsonIgnore
     @Lob
-    @JsonView(Views.Internal.class)
+    @JsonView(Views.Public.class)
+    @Getter(AccessLevel.NONE)
     /*@Type(type = "org.hibernate.type.ImageType")*/
     //@Type(type = "org.hibernate.type.PrimitiveByteArrayBlobType")
     private byte[] data;
@@ -48,11 +50,17 @@ public class File extends BaseModel {
     private User user;
 
     @OneToOne
-    @JsonView(Views.Internal.class)
+    @JsonView(Views.Detailed.class)
     private User userAvatar;
 
     @ManyToOne
     @JsonView(Views.Internal.class)
     private Post post;
+
+
+    public String getData() {
+        String encodedImage = Base64.getEncoder().encodeToString(this.data);
+        return encodedImage;
+    }
 
 }

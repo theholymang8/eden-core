@@ -5,6 +5,7 @@ import com.core.rest.eden.exceptions.UserAlreadyExistsException;
 import com.core.rest.eden.repositories.UserRepository;
 import com.core.rest.eden.transfer.DTO.UserRegisterDTO;
 import com.core.rest.eden.transfer.DTO.UserView;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -16,8 +17,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.Base64Utils;
 
 import javax.transaction.Transactional;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 @Service
 @RequiredArgsConstructor
@@ -27,6 +31,7 @@ public class UserServiceImpl extends BaseServiceImpl<User> implements UserServic
     private final UserRepository userRepository;
     private final TopicService topicService;
     private final PostService postService;
+    private final AuthenticationService authenticationService;
     private final FileService fileService;
 
     //private final BCryptPasswordEncoder bCryptPasswordEncoder;
@@ -49,6 +54,7 @@ public class UserServiceImpl extends BaseServiceImpl<User> implements UserServic
         }
     }
 
+    @Transactional
     @Override
     public User findByUsername(String username) {
         return userRepository.findByUsername(username);
@@ -82,6 +88,8 @@ public class UserServiceImpl extends BaseServiceImpl<User> implements UserServic
         List<User> users = new ArrayList<>();
         usernames.forEach(username -> users.add(userRepository.findByUsername(username)));
         Set<Topic> userRelatedTopics = topicService.findByUsers(users);
+        List<Post> relatedPosts = postService.findByTopics(userRelatedTopics, limit);
+        //relatedPosts.forEach(post -> logger.info("Post: {}", post.getId()));
         return postService.findByTopics(userRelatedTopics, limit);
     }
 
@@ -117,7 +125,7 @@ public class UserServiceImpl extends BaseServiceImpl<User> implements UserServic
 
     @Transactional
     @Override
-    public User registerUser(UserRegisterDTO user) throws UserAlreadyExistsException, NullPointerException{
+    public UserView registerUser(UserRegisterDTO user, String requestUrl) throws UserAlreadyExistsException, NullPointerException{
         /* Check for duplicate emails and username */
         if(emailExist(user.getEmail()) || usernameExist(user.getUserName())){
             throw new UserAlreadyExistsException("An account with this username/email already exists", new Exception("Custom Authentication Exception"));
@@ -148,7 +156,7 @@ public class UserServiceImpl extends BaseServiceImpl<User> implements UserServic
                     .size(user.getAvatar().getSize())
                     .build();
 
-            avatar.setUser(newUser);
+            avatar.setUserAvatar(newUser);
             newUser.setAvatar(avatar);
         }
         if (user.getTopics()!=null){
@@ -161,11 +169,20 @@ public class UserServiceImpl extends BaseServiceImpl<User> implements UserServic
             topicService.updateUsers(chosenTopics, newUser);
         }
 
+        userRepository.save(newUser);
+
+        String accessToken = authenticationService.generateAccessToken(newUser, requestUrl);
+        String refreshToken = authenticationService.generateRefreshToken(newUser, requestUrl);
 
 
+        UserView authenticatedUser = userRepository.findByUsernameAuth(newUser.getUsername());
+        authenticatedUser.setAccessToken(accessToken);
+        authenticatedUser.setRefreshToken(refreshToken);
+        authenticatedUser.setAccessTokenExpiration(new Date(System.currentTimeMillis() + 10 * 60 * 1000).getTime());
+        authenticatedUser.setRefreshTokenExpiration(new Date(System.currentTimeMillis() + 30 * 60 * 1000).getTime());
 
         logger.info("New User has registered: {} {} {} {}", user.getFirstName(), user.getEmail(), user.getTopics(), user.getAbout());
-        return userRepository.save(newUser);
+        return authenticatedUser;
     }
 
     /*@Override

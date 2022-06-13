@@ -3,6 +3,8 @@ package com.core.rest.eden.configuration.filter;
 import com.core.rest.eden.services.AuthenticationService;
 import com.core.rest.eden.services.UserService;
 import com.core.rest.eden.transfer.DTO.UserView;
+import com.core.rest.eden.transfer.views.Views;
+import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -15,13 +17,16 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.Date;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
-@RequiredArgsConstructor @Slf4j
+@RequiredArgsConstructor
+@Slf4j
 public class CustomAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 
     private final AuthenticationManager authenticationManager;
@@ -52,9 +57,10 @@ public class CustomAuthenticationFilter extends UsernamePasswordAuthenticationFi
         response.addCookie(authenticationService.generateRefreshCookie(refreshToken));
 
         UserView authenticatedUser = userService.findByUsernameAuth(user.getUsername());
-
-        authenticatedUser.setAccessToken(accessToken);
-        authenticatedUser.setRefreshToken(refreshToken);
+        authenticatedUser.setAccessTokenExpiration(new Date(System.currentTimeMillis() + 10 * 60 * 1000).getTime());
+        authenticatedUser.setRefreshTokenExpiration(new Date(System.currentTimeMillis() + 30 * 60 * 1000).getTime());
+        /*authenticatedUser.setAccessToken(accessToken);
+        authenticatedUser.setRefreshToken(refreshToken);*/
 
         response.setContentType(APPLICATION_JSON_VALUE);
         new ObjectMapper().writeValue(response.getOutputStream(), authenticatedUser);

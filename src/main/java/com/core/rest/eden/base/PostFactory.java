@@ -5,6 +5,7 @@ import com.core.rest.eden.domain.Post;
 import com.core.rest.eden.domain.User;
 import com.core.rest.eden.services.CommentService;
 import com.core.rest.eden.services.PostService;
+import com.core.rest.eden.services.TopicService;
 import com.core.rest.eden.services.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
@@ -24,6 +25,8 @@ public class PostFactory extends AbstractLogComponent implements CommandLineRunn
     private final PostService postService;
 
     private final CommentService commentService;
+
+    private final TopicService topicService;
 
     @Override
     public void run(String... args) {

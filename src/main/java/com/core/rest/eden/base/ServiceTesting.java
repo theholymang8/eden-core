@@ -4,6 +4,7 @@ import com.core.rest.eden.domain.Comment;
 import com.core.rest.eden.domain.Post;
 import com.core.rest.eden.domain.User;
 import com.core.rest.eden.services.CommentService;
+import com.core.rest.eden.services.FileService;
 import com.core.rest.eden.services.PostService;
 import com.core.rest.eden.services.UserService;
 import com.core.rest.eden.transfer.DTO.CommentView;
@@ -27,6 +28,7 @@ public class ServiceTesting extends AbstractLogComponent implements CommandLineR
 
     private final CommentService commentService;
 
+    private final FileService fileService;
 
 
     @Override
@@ -46,7 +48,7 @@ public class ServiceTesting extends AbstractLogComponent implements CommandLineR
 
         //users.forEach(user -> logger.info("User: {}, {}", user.getFirstName(), user.getLastName()));
 
-        User user = userService.findByUsername("vanas");
+        //User user = userService.findByUsername("vanas");
 
         //User user = userService.findByName("Pavlos", "Poulos");
 
@@ -65,8 +67,15 @@ public class ServiceTesting extends AbstractLogComponent implements CommandLineR
 
         //logger.info("Testing userPostView : {}", userPostView);
 
-        user.getTopics().forEach(topic -> logger.info("Vasilios has these topics: {}", topic.getTitle()));
+        //user.getTopics().forEach(topic -> logger.info("Vasilios has these topics: {}", topic.getTitle()));
 
         //userService.findFriends(user).forEach(friend -> logger.info("Giannis has the following friend: {}", friend));
+
+        logger.info("Found User {}", userService.findByUsername("xristinpapadim").getAvatar());
+
+        //userService.findByUsername("ganast").getFiles().forEach(file -> logger.info("Found one file: {}", file));
+
+        //logger.info("Found file {}", fileService.findByName("cv_pic.jpg").getUser());
+
     }
 }

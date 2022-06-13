@@ -12,6 +12,7 @@ import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import java.io.IOException;
+import java.util.NoSuchElementException;
 
 @ControllerAdvice
 @Slf4j
@@ -33,6 +34,12 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
     public ResponseEntity<ApiResponse<String>> handleNullCookies(NullPointerException nullPointerException) {
         log.info("Null Cookies sent on request: {}", nullPointerException);
         return new ResponseEntity<>(ApiResponse.<String>builder().data("Cookies are null or expired").build(), HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(NoSuchElementException.class)
+    public ResponseEntity<ApiResponse<String>> handleNoSuchElement(NoSuchElementException noSuchElementException) {
+        log.info("No such element exists on the database: {}", noSuchElementException);
+        return new ResponseEntity<>(ApiResponse.<String>builder().data("No such element exists").build(), HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(UserAlreadyExistsException.class)

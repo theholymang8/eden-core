@@ -35,9 +35,22 @@ public abstract class BaseServiceImpl<T extends BaseModel> extends AbstractLogCo
     }
 
     @Override
+    public void updateAll(List<T> entities){
+        final List<T> updatedEntities = new ArrayList<>();
+        for (final T entity : entities) {
+            getRepository().save(entity);
+        }
+    }
+
+    @Override
     public void update(final T entity) {
         logger.trace("Updating {}.", entity);
         getRepository().save(entity);
+    }
+    
+    @Override
+    public void updateAll(final T... entities) {
+        updateAll(entities);
     }
 
     @Override

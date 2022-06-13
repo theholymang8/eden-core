@@ -72,11 +72,11 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
         /* Permit Resources */
         http
                 .authorizeRequests()
-                .antMatchers(POST, "/users/register")
+                .antMatchers(POST, "/auth/register")
                 .permitAll();
         http
                 .authorizeRequests()
-                .antMatchers(GET, "/token/refresh/**", "/token/revoke/**")
+                .antMatchers(GET, "/auth/token/refresh/**", "/auth/token/revoke/**")
                 .permitAll();
         http
                 .authorizeRequests()

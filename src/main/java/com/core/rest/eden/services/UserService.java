@@ -33,7 +33,7 @@ public interface UserService extends BaseService<User, Long>{
 
     List<Post> findFriendsPosts(String username, Integer limit);
 
-    User registerUser(UserRegisterDTO user);
+    UserView registerUser(UserRegisterDTO user, String requestUrl);
 
     //List<Post> findFriendsPostsPageable(String username, Integer limit);
 

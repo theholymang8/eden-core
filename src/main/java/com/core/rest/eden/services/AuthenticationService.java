@@ -26,6 +26,8 @@ public interface AuthenticationService {
 
     Boolean authoriseUser(String authHeader);
 
+    Boolean authoriseUser(Cookie [] cookies, String value);
+
     String extractTokenFromCookie(Cookie[] cookies, String value);
 
     String provideUser(String token);
@@ -35,6 +37,10 @@ public interface AuthenticationService {
     Cookie generateAccessCookie(String accessToken);
 
     Cookie generateRefreshCookie(String refreshToken);
+
+    Cookie generateAccessCookieExpiration();
+
+    Cookie generateRefreshCookieExpiration();
 
     Boolean validateToken(String authHeader);
 

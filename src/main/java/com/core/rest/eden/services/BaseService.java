@@ -10,6 +10,10 @@ public interface BaseService <T, ID>{
 
     List<T> createAll(T... entities);
 
+    void updateAll(List<T> entities);
+
+    void updateAll(T... entities);
+
     void update(T entity);
 
     void delete(T entity);

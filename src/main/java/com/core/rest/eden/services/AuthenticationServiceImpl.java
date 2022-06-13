@@ -16,6 +16,7 @@ import javax.servlet.http.Cookie;
 import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 
 import static java.util.Arrays.stream;
 
@@ -23,7 +24,6 @@ import static java.util.Arrays.stream;
 @RequiredArgsConstructor
 public class AuthenticationServiceImpl extends AbstractLogComponent implements AuthenticationService {
 
-    private final UserService userService;
     private final AccessTokenService accessTokenService;
     //private String issuer;
 
@@ -105,6 +105,18 @@ public class AuthenticationServiceImpl extends AbstractLogComponent implements A
     }
 
     @Override
+    public Boolean authoriseUser(Cookie[] cookies, String value) {
+        String token = extractTokenFromCookie(cookies, value);
+        String username = accessTokenService.extractUsername(token);
+        if (!accessTokenService.validateToken(token, username)) return false;
+        Collection<SimpleGrantedAuthority> authorities = grantAuthorities(token);
+        UsernamePasswordAuthenticationToken authenticationToken =
+                new UsernamePasswordAuthenticationToken(accessTokenService.extractUsername(token), null, authorities);
+        SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+        return true;
+    }
+
+    @Override
     public String extractTokenFromCookie(Cookie[] cookies, String value) {
         if (!validateCookie(cookies, value)) return null;
         if (cookies != null) {
@@ -151,6 +163,20 @@ public class AuthenticationServiceImpl extends AbstractLogComponent implements A
         return new Cookie("refresh-token", refreshToken) {{
             setMaxAge(30 * 60);
             setHttpOnly(true);
+            setPath("/");
+        }};
+    }
+
+    @Override
+    public Cookie generateAccessCookieExpiration() {
+        return new Cookie("access-token-expiration", Integer.toString(10*60)) {{
+            setPath("/");
+        }};
+    }
+
+    @Override
+    public Cookie generateRefreshCookieExpiration() {
+        return new Cookie("refresh-token-expiration", Integer.toString(30*60)) {{
             setPath("/");
         }};
     }

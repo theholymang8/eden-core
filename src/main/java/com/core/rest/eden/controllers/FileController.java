@@ -15,6 +15,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -69,13 +70,13 @@ public class FileController extends AbstractController<File> {
 
     @GetMapping(value = "/{id}",
     headers = "action=downloadFile")
-    private ResponseEntity<ApiResponse<byte[]>> getFile(@PathVariable Long id) {
+    private ResponseEntity<ApiResponse<String>> getFile(@PathVariable Long id) throws NoSuchElementException {
         File fileOptional = fileService.find(id);
 
         if (fileOptional == null){
             return ResponseEntity.notFound().build();
         }
 
-        return ResponseEntity.ok(ApiResponse.<byte[]>builder().data(fileOptional.getData()).build());
+        return ResponseEntity.ok(ApiResponse.<String>builder().data(fileOptional.getData()).build());
     }
 }

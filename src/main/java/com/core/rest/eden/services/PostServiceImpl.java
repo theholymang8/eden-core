@@ -12,6 +12,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.*;
 
 @Service
@@ -39,7 +40,12 @@ public class PostServiceImpl extends BaseServiceImpl<Post> implements PostServic
 
     @Override
     public List<Post> findByTopics(Set<Topic> topics, Integer limit) {
-        return postRepository.findAllByTopicsIn(topics, PageRequest.of(0, limit, Sort.by(Sort.Direction.DESC, "dateCreated")));
+        List<Post> relatedPosts = postRepository.findDistinctAllByTopicsIn(topics, PageRequest.of(0, limit, Sort.by(Sort.Direction.DESC, "dateCreated")));
+
+        //relatedPosts.forEach(post -> logger.info("Found post: {} with these topics: {}", post.getId(), post.getTopics()));
+
+        //logger.info("Getting Posts: {}", postRepository.findAllByTopicsIn(topics, PageRequest.of(0, limit, Sort.by(Sort.Direction.DESC, "dateCreated"))));
+        return postRepository.findDistinctAllByTopicsIn(topics, PageRequest.of(0, limit, Sort.by(Sort.Direction.DESC, "dateCreated")));
     }
 
     /*@Override
@@ -48,8 +54,10 @@ public class PostServiceImpl extends BaseServiceImpl<Post> implements PostServic
     }*/
 
     @Override
-    public void addLike(Long id) {
-        Post foundPost = postRepository.findById(id).orElseThrow(NoSuchElementException::new);
+    public void addLike(Long id) throws NoSuchElementException{
+        Post foundPost = postRepository.getById(id);
+        //Post foundPost = postRepository.findById(id).orElseThrow(NoSuchElementException::new);
+        logger.info("Found Post: {}", foundPost);
         foundPost.setLikes(foundPost.getLikes()+1);
         // logger.info("post has: {} likes", post.getLikes());
         postRepository.save(foundPost);
@@ -57,8 +65,9 @@ public class PostServiceImpl extends BaseServiceImpl<Post> implements PostServic
 
     @Override
     public void addLikev2(Post post) {
-        //Post foundPost = postRepository.findById(id).orElseThrow(NoSuchElementException::new);
         post.setLikes(post.getLikes()+1);
+        post.setDateUpdated(LocalDateTime.now());
+        logger.info("Post by service is :{}", post);
         // logger.info("post has: {} likes", post.getLikes());
         postRepository.save(post);
     }
