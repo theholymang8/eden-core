@@ -39,12 +39,12 @@ public class PostController extends AbstractController<Post>{
         return postService;
     }
 
-    @PostMapping(path = "upload")
+    /*@PostMapping(path = "upload")
     public ResponseEntity<ApiResponse<Post>> createWithImageDto(@Valid @RequestBody final PostDTO entity) {
         return ResponseEntity.ok(ApiResponse.<Post>builder()
                 .data(postService.uploadPost(entity))
                 .build());
-    }
+    }*/
 
     /*@PostMapping(path = "upload", consumes = "multipart/form-data")
     public ResponseEntity<ApiResponse<Post>> createWithImage(@Valid @RequestPart("entity") final Post entity, @RequestPart("file") MultipartFile multipartFile, @RequestPart("username") String username) throws NullPointerException, IOException {

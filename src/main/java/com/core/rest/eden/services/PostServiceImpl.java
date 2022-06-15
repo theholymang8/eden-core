@@ -10,6 +10,7 @@ import com.core.rest.eden.transfer.DTO.PostDTO;
 import com.core.rest.eden.transfer.DTO.UserPostView;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Service;
@@ -45,18 +46,18 @@ public class PostServiceImpl extends BaseServiceImpl<Post> implements PostServic
     }
 
     @Override
-    public List<Post> findUserPosts(User user, Integer limit) {
-       return postRepository.findAllByUser(user, PageRequest.of(0,limit));
+    public List<Post> findUserPosts(User user, Integer limit, Integer page) {
+       return postRepository.findAllByUser(user, PageRequest.of(page,limit));
     }
 
     @Override
-    public List<Post> findByTopics(Set<Topic> topics, Integer limit) {
-        List<Post> relatedPosts = postRepository.findDistinctAllByTopicsIn(topics, PageRequest.of(0, limit, Sort.by(Sort.Direction.DESC, "dateCreated")));
+    public List<Post> findByTopics(Set<Topic> topics, Integer limit, Integer page) {
+        //List<Post> relatedPosts = postRepository.findDistinctAllByTopicsIn(topics, PageRequest.of(0, limit, Sort.by(Sort.Direction.DESC, "dateCreated")));
 
         //relatedPosts.forEach(post -> logger.info("Found post: {} with these topics: {}", post.getId(), post.getTopics()));
 
         //logger.info("Getting Posts: {}", postRepository.findAllByTopicsIn(topics, PageRequest.of(0, limit, Sort.by(Sort.Direction.DESC, "dateCreated"))));
-        return postRepository.findDistinctAllByTopicsIn(topics, PageRequest.of(0, limit, Sort.by(Sort.Direction.DESC, "dateCreated")));
+        return postRepository.findDistinctAllByTopicsIn(topics, PageRequest.of(page, limit, Sort.by(Sort.Direction.DESC, "dateCreated")));
     }
 
     /*@Override
@@ -72,12 +73,13 @@ public class PostServiceImpl extends BaseServiceImpl<Post> implements PostServic
         return postRepository.save(foundPost);
     }
 
-    @Override
+   /* @Override
     public Post uploadPost(PostDTO entity) {
         Post newPost = Post.builder()
                 .dateCreated(entity.getDateCreated())
                 .body(entity.getBody())
                 .likes(0)
+                //.user(entity.getUser())
                 .build();
 
         if(entity.getImage()!=null){
@@ -89,13 +91,16 @@ public class PostServiceImpl extends BaseServiceImpl<Post> implements PostServic
                     .data(fileBytes)
                     .build();
             newPost.setImage(fileEntity);
-            /*fileEntity.setPost(newPost);
-            fileService.create(fileEntity);*/
+            *//*fileEntity.setPost(newPost);
+            fileService.create(fileEntity);*//*
         }
+
+        logger.info("Post: {}", newPost);
+
         postRepository.save(newPost);
         return newPost;
 
-    }
+    }*/
 
     @Override
     public void addLikev2(Post post) {

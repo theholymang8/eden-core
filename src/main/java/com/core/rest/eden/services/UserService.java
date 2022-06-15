@@ -4,6 +4,7 @@ import com.core.rest.eden.domain.Post;
 import com.core.rest.eden.domain.Role;
 import com.core.rest.eden.domain.Topic;
 import com.core.rest.eden.domain.User;
+import com.core.rest.eden.transfer.DTO.PostDTO;
 import com.core.rest.eden.transfer.DTO.UserRegisterDTO;
 import com.core.rest.eden.transfer.DTO.UserView;
 
@@ -17,16 +18,19 @@ public interface UserService extends BaseService<User, Long>{
 
     UserView findByUsernameAuth(String username);
 
-    List<Post> findPosts(String firstName, String lastName, Integer limit);
+    List<Post> findPosts(String firstName, String lastName, Integer limit, Integer page);
 
-    List<Post> findPostsByUsername(String username, Integer limit);
+    List<Post> findPostsByUsername(String username, Integer limit, Integer page);
 
     void addRoleToUser(String firstName, String lastName, Role role);
 
-    List<Post> findTopicRelatedPosts(List<String> usernames, Integer limit);
+    List<Post> findTopicRelatedPosts(List<String> usernames, Integer limit, Integer page);
 
     User saveUser(User user);
 
+    User findUserProfile(String username);
+
+    Post uploadPost(PostDTO entity);
 
     User loadUserByEmail(String username);
 

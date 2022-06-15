@@ -1,5 +1,6 @@
 package com.core.rest.eden.transfer.DTO;
 
+import com.core.rest.eden.domain.User;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Data;

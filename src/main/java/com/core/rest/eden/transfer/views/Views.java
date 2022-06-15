@@ -6,5 +6,7 @@ public class Views {
 
     public interface Detailed extends Public {}
 
-    public interface Internal extends Detailed {}
+    public interface Relational extends Detailed {}
+
+    public interface Internal extends Relational {}
 }

@@ -14,14 +14,14 @@ import java.util.Set;
 @AllArgsConstructor
 @NoArgsConstructor
 @SuperBuilder
-@ToString(callSuper = true, exclude = {"comments", "user", "files"})
-@EqualsAndHashCode(callSuper = true, exclude = {"comments", "user", "files"})
+@ToString(callSuper = true, exclude = {"comments"})
+@EqualsAndHashCode(callSuper = true, exclude = {"comments"})
 @Data
 
 @Entity
 @Table(name = "POSTS")
 
-@JsonIgnoreProperties(value = {"user"})
+//@JsonIgnoreProperties(value = {"user"})
 
 @SequenceGenerator(name = "idGenerator", sequenceName = "POST_SEQ", allocationSize = 1)
 public class Post extends BaseModel implements Comparable<Post>{
@@ -46,25 +46,28 @@ public class Post extends BaseModel implements Comparable<Post>{
     @JsonView(Views.Public.class)
     private Integer likes;
 
-    @ManyToMany(
-            cascade = {CascadeType.REFRESH, CascadeType.DETACH},
-            fetch = FetchType.EAGER)
-    @JoinTable(name = "`POST_TOPICS`",
-            joinColumns = @JoinColumn(name = "`post_id`"),
-            foreignKey = @ForeignKey(name = "post_id"),
-            inverseJoinColumns = @JoinColumn(name = "`topic_id`"),
-            inverseForeignKey = @ForeignKey(name = "topic_id")
+
+    @ManyToMany(mappedBy = "posts",
+            cascade = CascadeType.ALL,
+            fetch = FetchType.LAZY
     )
-    @JsonView(Views.Detailed.class)
+    @JsonView(Views.Public.class)
     private Set<Topic> topics = new HashSet<>();
 
-    @JsonView(Views.Public.class)
+    /*@JsonView(Views.Public.class)
     @OneToMany(
             cascade = {CascadeType.MERGE, CascadeType.REFRESH, CascadeType.DETACH},
-            fetch = FetchType.EAGER,
+            fetch = FetchType.LAZY,
             mappedBy = "post"
     )
-    private Set<File> files;
+    private Set<File> files;*/
+
+    @JsonView(Views.Public.class)
+    @OneToOne(cascade = CascadeType.ALL,
+              orphanRemoval = true
+    )
+    @PrimaryKeyJoinColumn
+    private File image;
 
     @OneToMany(cascade = {CascadeType.MERGE, CascadeType.REFRESH, CascadeType.DETACH},
                 fetch = FetchType.LAZY,
@@ -74,7 +77,8 @@ public class Post extends BaseModel implements Comparable<Post>{
     private Set<Comment> comments = new HashSet<>();
 
     @ManyToOne
-    @JsonView(Views.Detailed.class)
+    @JsonView(Views.Public.class)
+    @Getter(AccessLevel.NONE)
     private User user;
 
 
@@ -84,5 +88,9 @@ public class Post extends BaseModel implements Comparable<Post>{
             return 0;
         }
         return getDateCreated().compareTo(post.getDateCreated());
+    }
+
+    public String getUser() {
+        return this.user.getUsername();
     }
 }

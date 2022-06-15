@@ -3,6 +3,7 @@ package com.core.rest.eden.services;
 import com.core.rest.eden.domain.*;
 import com.core.rest.eden.exceptions.UserAlreadyExistsException;
 import com.core.rest.eden.repositories.UserRepository;
+import com.core.rest.eden.transfer.DTO.PostDTO;
 import com.core.rest.eden.transfer.DTO.UserRegisterDTO;
 import com.core.rest.eden.transfer.DTO.UserView;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -15,6 +16,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Base64Utils;
+import org.springframework.util.StringUtils;
 
 import javax.transaction.Transactional;
 import java.time.LocalDateTime;
@@ -66,15 +68,15 @@ public class UserServiceImpl extends BaseServiceImpl<User> implements UserServic
     }
 
     @Override
-    public List<Post> findPosts(String firstName, String lastName, Integer limit) {
+    public List<Post> findPosts(String firstName, String lastName, Integer limit, Integer page) {
         User user = userRepository.findByFirstNameAndLastName(firstName, lastName);
-        return postService.findUserPosts(user, limit);
+        return postService.findUserPosts(user, limit, page);
     }
 
     @Override
-    public List<Post> findPostsByUsername(String username, Integer limit) {
+    public List<Post> findPostsByUsername(String username, Integer limit, Integer page) {
         User user = userRepository.findByUsername(username);
-        return postService.findUserPosts(user, limit);
+        return postService.findUserPosts(user, limit, page);
     }
 
     @Override
@@ -84,19 +86,51 @@ public class UserServiceImpl extends BaseServiceImpl<User> implements UserServic
     }
 
     @Override
-    public List<Post> findTopicRelatedPosts(List<String> usernames, Integer limit) {
+    public List<Post> findTopicRelatedPosts(List<String> usernames, Integer limit, Integer page) {
         List<User> users = new ArrayList<>();
         usernames.forEach(username -> users.add(userRepository.findByUsername(username)));
         Set<Topic> userRelatedTopics = topicService.findByUsers(users);
-        List<Post> relatedPosts = postService.findByTopics(userRelatedTopics, limit);
+        //List<Post> relatedPosts = postService.findByTopics(userRelatedTopics, limit);
         //relatedPosts.forEach(post -> logger.info("Post: {}", post.getId()));
-        return postService.findByTopics(userRelatedTopics, limit);
+        return postService.findByTopics(userRelatedTopics, limit, page);
     }
 
     @Override
     public User saveUser(User user) {
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         return userRepository.save(user);
+    }
+
+    @Override
+    public User findUserProfile(String username) {
+        return userRepository.findUserProfile(username);
+    }
+
+    @Override
+    public Post uploadPost(PostDTO entity) {
+        User user = userRepository.findByUsername(entity.getUsername());
+        Post newPost = Post.builder()
+                .dateCreated(entity.getDateCreated())
+                .body(entity.getBody())
+                .likes(0)
+                .user(user)
+                .build();
+
+        if(entity.getImage()!=null){
+            byte[] fileBytes = Base64Utils.decodeFromString(entity.getImage().getBase64());
+
+            File fileEntity = File.builder()
+                    .name(StringUtils.cleanPath(entity.getImage().getName()))
+                    .contentType(entity.getImage().getContentType())
+                    .data(fileBytes)
+                    .build();
+            newPost.setImage(fileEntity);
+            /*fileEntity.setPost(newPost);
+            fileService.create(fileEntity);*/
+        }
+        //userRepository.save(user);
+        postService.create(newPost);
+        return newPost;
     }
 
     @Override

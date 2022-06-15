@@ -35,6 +35,7 @@ public class User extends BaseModel{
     @NotNull(message = "{username.null}")
     @Column(length = 60, nullable = false)
     @JsonView(Views.Public.class)
+    @JsonProperty("userName")
     private String username;
 
     @NotNull(message = "{firstName.null}")
@@ -75,6 +76,7 @@ public class User extends BaseModel{
     @JsonView(Views.Detailed.class)
     private Gender gender;
 
+    @JsonView(Views.Relational.class)
     @OneToMany(
             cascade = {CascadeType.MERGE, CascadeType.REFRESH, CascadeType.DETACH},
             fetch = FetchType.LAZY,
@@ -111,7 +113,8 @@ public class User extends BaseModel{
     @OneToMany(cascade = {CascadeType.MERGE, CascadeType.REFRESH, CascadeType.DETACH},
             fetch = FetchType.LAZY,
             mappedBy = "user")
-    @JsonView(Views.Detailed.class)
+    @OrderBy("dateCreated DESC")
+    @JsonView(Views.Relational.class)
     private Set<Post> posts = new HashSet<>();
 
 
@@ -122,7 +125,7 @@ public class User extends BaseModel{
     private Comment comment;*/
 
     @ManyToMany(mappedBy = "members", fetch = FetchType.LAZY)
-    @JsonView(Views.Detailed.class)
+    @JsonView(Views.Relational.class)
     private Set<Group> groups = new HashSet<>();
 
 }

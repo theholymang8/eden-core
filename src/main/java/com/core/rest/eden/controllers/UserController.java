@@ -7,11 +7,13 @@ import com.core.rest.eden.domain.User;
 import com.core.rest.eden.services.AuthenticationService;
 import com.core.rest.eden.services.BaseService;
 import com.core.rest.eden.services.UserService;
+import com.core.rest.eden.transfer.DTO.PostDTO;
 import com.core.rest.eden.transfer.DTO.UserRegisterDTO;
 import com.core.rest.eden.transfer.DTO.UserView;
 import com.core.rest.eden.transfer.views.Views;
 import com.fasterxml.jackson.annotation.JsonView;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -28,7 +30,6 @@ import java.util.*;
 public class UserController extends AbstractController<User>{
 
     private final UserService userService;
-    private final AuthenticationService authenticationService;
 
     @Override
     protected BaseService<User, Long> getBaseService() {
@@ -47,41 +48,50 @@ public class UserController extends AbstractController<User>{
     }
 
 
+    @PostMapping(path = "upload")
+    public ResponseEntity<ApiResponse<Post>> createWithImageDto(@Valid @RequestBody final PostDTO entity) {
+        return ResponseEntity.ok(ApiResponse.<Post>builder()
+                .data(userService.uploadPost(entity))
+                .build());
+    }
 
     @JsonView(Views.Public.class)
     @GetMapping(
             headers = "action=findPosts",
-            params = {"firstName", "lastName", "limit"})
+            params = {"firstName", "lastName", "limit", "page"})
     public ResponseEntity<ApiResponse<List<Post>>> findPosts(
             @Valid @RequestParam("firstName") String firstName,
             @Valid @RequestParam String lastName,
-            @RequestParam Integer limit){
+            @RequestParam Integer limit,
+            @RequestParam(defaultValue = "0") Integer page){
         return ResponseEntity.ok(ApiResponse.<List<Post>>builder()
-                .data(userService.findPosts(firstName, lastName, limit))
+                .data(userService.findPosts(firstName, lastName, limit, page))
                 .build());
     }
 
     @JsonView(Views.Public.class)
     @GetMapping(
             headers = "action=findTopicRelated",
-            params = {"username", "limit"})
+            params = {"username", "limit", "page"})
     public ResponseEntity<ApiResponse<List<Post>>> findTopicRelatedPosts(
             @Valid @RequestParam("username") List<String> usernames,
-            @RequestParam Integer limit){
+            @RequestParam(defaultValue = "10") Integer limit,
+            @RequestParam(defaultValue = "0") Integer page){
         return ResponseEntity.ok(ApiResponse.<List<Post>>builder()
-                .data(userService.findTopicRelatedPosts(usernames, limit))
+                .data(userService.findTopicRelatedPosts(usernames, limit, page))
                 .build());
     }
 
     @JsonView(Views.Public.class)
     @GetMapping(
             headers = "action=findPostsByUsername",
-            params = {"username", "limit"})
+            params = {"username", "limit", "page"})
     public ResponseEntity<ApiResponse<List<Post>>> findPostsByUsername(
             @Valid @RequestParam("username") String username,
-            @RequestParam Integer limit){
+            @RequestParam Integer limit,
+            @RequestParam(defaultValue = "0") Integer page){
         return ResponseEntity.ok(ApiResponse.<List<Post>>builder()
-                .data(userService.findPostsByUsername(username, limit))
+                .data(userService.findPostsByUsername(username, limit, page))
                 .build());
     }
 
@@ -92,7 +102,7 @@ public class UserController extends AbstractController<User>{
     public ResponseEntity<ApiResponse<User>> findUserProfile(
             @Valid @RequestParam("username") String username){
         return ResponseEntity.ok(ApiResponse.<User>builder()
-                .data(userService.findByUsername(username))
+                .data(userService.findUserProfile(username))
                 .build());
     }
 

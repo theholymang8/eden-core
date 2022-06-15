@@ -23,7 +23,7 @@ public interface PostRepository extends JpaRepository<Post, Long>, CustomPostRep
 
     Post findByIdCustom(Long id);
 
-    @Query(value = "select distinct p from Post p where p.user = :user")
+    @Query(value = "select distinct p from Post p where p.user = :user order by p.dateCreated desc")
     List<Post> findAllByUser(User user, Pageable pageable);
 
     Post findByUser(User user);

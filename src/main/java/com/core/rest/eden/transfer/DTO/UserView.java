@@ -1,5 +1,6 @@
 package com.core.rest.eden.transfer.DTO;
 
+import com.core.rest.eden.domain.Gender;
 import com.core.rest.eden.transfer.views.Views;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonView;
@@ -7,8 +8,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
-import java.util.Date;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 
 
 @AllArgsConstructor
@@ -31,6 +32,15 @@ public class UserView {
     @JsonView(Views.Public.class)
     @JsonProperty("userName")
     private String userName;
+
+    @JsonView(Views.Public.class)
+    @JsonProperty("email")
+    private String email;
+
+    @JsonProperty("gender")
+    @Enumerated(EnumType.STRING)
+    @JsonView(Views.Detailed.class)
+    private Gender gender;
 
     @JsonView(Views.Internal.class)
     @JsonProperty("accessToken")
