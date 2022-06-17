@@ -1,9 +1,6 @@
 package com.core.rest.eden.services;
 
-import com.core.rest.eden.domain.File;
-import com.core.rest.eden.domain.Post;
-import com.core.rest.eden.domain.Topic;
-import com.core.rest.eden.domain.User;
+import com.core.rest.eden.domain.*;
 import com.core.rest.eden.repositories.PostRepository;
 import com.core.rest.eden.transfer.DTO.CommentView;
 import com.core.rest.eden.transfer.DTO.PostDTO;
@@ -71,6 +68,29 @@ public class PostServiceImpl extends BaseServiceImpl<Post> implements PostServic
         //Post foundPost = postRepository.findById(id).orElseThrow(NoSuchElementException::new);
         foundPost.setLikes(foundPost.getLikes()+1);
         return postRepository.save(foundPost);
+    }
+
+    @Override
+    public Post addComment(Long postID, Comment comment) {
+        Post post = postRepository.getById(postID);
+        comment.setPost(post);
+        logger.info("Post Comments: {}", post.getBody());
+        //return post;
+        if(post.getComments() == null) {
+            post.setComments(Set.of(comment));
+        }else{
+            post.getComments().add(comment);
+        }
+        return postRepository.save(post);
+    }
+
+    @Override
+    public Post deleteComment(Long postID, Comment comment) {
+        Post post = postRepository.getById(postID);
+        commentService.delete(comment);
+        logger.info("Comments: {}", post.getComments());
+        post.getComments().remove(comment);
+        return postRepository.save(post);
     }
 
    /* @Override

@@ -32,11 +32,7 @@ public class TopicServiceImpl extends BaseServiceImpl<Topic> implements TopicSer
     public Set<Topic> findByUsers(List<User> users) {
         Set<Topic> foundTopics = new HashSet<>();
         for(final User user : users){
-            /* Split user name into first Name and last Name*/
-            //String[] nameSplit = user.split("\\s+");
-            //User foundUser = userService.findByName(nameSplit[0], nameSplit[1]);
-            //User foundUser = userService.findByUsername(username);
-            logger.info("User: {}", user);
+            //logger.info("User: {}", user);
             if (user != null){
                 //logger.trace("Found Topics for User : {} ", user);
                 foundTopics.addAll(topicRepository.findAllByUsers(user));
@@ -49,11 +45,9 @@ public class TopicServiceImpl extends BaseServiceImpl<Topic> implements TopicSer
     public void updateUsers(Set<Topic> topics, User user) {
         topics.forEach(topic -> {
             if(topic.getUsers() == null){
-                //logger.info("Topics have no users");
                 topic.setUsers(Set.of(user));
             }else{
                 topic.getUsers().add(user);
-                //logger.info("Topics have users");
             }
             //topicRepository.save(topic);
         });

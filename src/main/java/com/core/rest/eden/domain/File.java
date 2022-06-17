@@ -54,7 +54,8 @@ public class File extends BaseModel {
     private User userAvatar;
 
     //@MapsId
-    @OneToOne(mappedBy = "image")
+    @OneToOne
+    @JoinColumn(name = "post_id")
     @JsonView(Views.Internal.class)
     private Post post;
 

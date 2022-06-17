@@ -47,6 +47,17 @@ public class UserController extends AbstractController<User>{
                 .build());
     }
 
+    @JsonView(Views.Detailed.class)
+    @GetMapping(
+            headers = "action=addComment",
+            params = {"firstName", "lastName"})
+    public ResponseEntity<ApiResponse<User>> addComment(
+            @Valid @RequestParam("firstName") String firstName, @Valid @RequestParam String lastName){
+        return ResponseEntity.ok(ApiResponse.<User>builder()
+                .data(userService.findByName(firstName, lastName))
+                .build());
+    }
+
 
     @PostMapping(path = "upload")
     public ResponseEntity<ApiResponse<Post>> createWithImageDto(@Valid @RequestBody final PostDTO entity) {
@@ -83,11 +94,11 @@ public class UserController extends AbstractController<User>{
     }
 
     @JsonView(Views.Public.class)
-    @GetMapping(
+    @GetMapping(path = "/{username}",
             headers = "action=findPostsByUsername",
-            params = {"username", "limit", "page"})
+            params = {"limit", "page"})
     public ResponseEntity<ApiResponse<List<Post>>> findPostsByUsername(
-            @Valid @RequestParam("username") String username,
+            @PathVariable("username") String username,
             @RequestParam Integer limit,
             @RequestParam(defaultValue = "0") Integer page){
         return ResponseEntity.ok(ApiResponse.<List<Post>>builder()
@@ -97,10 +108,11 @@ public class UserController extends AbstractController<User>{
 
     @JsonView(Views.Detailed.class)
     @GetMapping(
-            headers = "action=findUserProfile",
-            params = {"username"})
+            path = "find/{username}",
+            headers = "action=findUserProfile"
+    )
     public ResponseEntity<ApiResponse<User>> findUserProfile(
-            @Valid @RequestParam("username") String username){
+            @PathVariable("username") String username){
         return ResponseEntity.ok(ApiResponse.<User>builder()
                 .data(userService.findUserProfile(username))
                 .build());

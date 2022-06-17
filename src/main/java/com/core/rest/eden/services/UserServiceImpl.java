@@ -122,15 +122,26 @@ public class UserServiceImpl extends BaseServiceImpl<User> implements UserServic
             File fileEntity = File.builder()
                     .name(StringUtils.cleanPath(entity.getImage().getName()))
                     .contentType(entity.getImage().getContentType())
+                    .post(newPost)
+                    .user(user)
                     .data(fileBytes)
                     .build();
             newPost.setImage(fileEntity);
-            /*fileEntity.setPost(newPost);
-            fileService.create(fileEntity);*/
+            logger.info("Image post: {}", fileEntity.getPost().getId());
+            //fileEntity.setPost(newPost);
+            //fileService.create(fileEntity);
         }
         //userRepository.save(user);
+        //logger.info("Post Image: {}", newPost.getImage());
         postService.create(newPost);
         return newPost;
+    }
+
+    @Override
+    public Post addComment(Post post, String username) {
+        /*User user = userRepository.findByUsername(username);
+        post*/
+        return null;
     }
 
     @Override
@@ -179,7 +190,6 @@ public class UserServiceImpl extends BaseServiceImpl<User> implements UserServic
 
         File avatar;
         /* Decode User's Avatar from base64 format */
-        //logger.info("User's image is: {}", user.getAvatar());
         if (user.getAvatar()!=null) {
             byte[] fileBytes = Base64Utils.decodeFromString(user.getAvatar().getBase64());
 
@@ -198,7 +208,7 @@ public class UserServiceImpl extends BaseServiceImpl<User> implements UserServic
             user.getTopics().forEach(topic -> {
                 chosenTopics.add(topicService.findByTitle(topic.getTitle()));
             });
-            logger.info("Topics: {}", chosenTopics);
+            //logger.info("Topics: {}", chosenTopics);
             newUser.setTopics(chosenTopics);
             topicService.updateUsers(chosenTopics, newUser);
         }

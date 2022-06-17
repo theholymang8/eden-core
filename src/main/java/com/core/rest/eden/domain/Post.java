@@ -66,7 +66,7 @@ public class Post extends BaseModel implements Comparable<Post>{
     @OneToOne(cascade = CascadeType.ALL,
               orphanRemoval = true
     )
-    @PrimaryKeyJoinColumn
+    //@PrimaryKeyJoinColumn
     private File image;
 
     @OneToMany(cascade = {CascadeType.MERGE, CascadeType.REFRESH, CascadeType.DETACH},

@@ -32,6 +32,8 @@ public interface UserService extends BaseService<User, Long>{
 
     Post uploadPost(PostDTO entity);
 
+    Post addComment(Post post, String username);
+
     User loadUserByEmail(String username);
 
     List<User> findFriends(User user);
