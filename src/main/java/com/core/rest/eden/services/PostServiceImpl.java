@@ -57,10 +57,10 @@ public class PostServiceImpl extends BaseServiceImpl<Post> implements PostServic
         return postRepository.findDistinctAllByTopicsIn(topics, PageRequest.of(page, limit, Sort.by(Sort.Direction.DESC, "dateCreated")));
     }
 
-    /*@Override
-    public List<Post> findFriendsPosts(User user, Integer limit) {
-        return postRepository.findFriendsPosts(user, PageRequest.of(0, limit));
-    }*/
+    @Override
+    public List<Post> findFriendsPosts(User user, Integer limit, Integer page) {
+        return postRepository.findFriendsPosts(user, PageRequest.of(page, limit, Sort.by(Sort.Direction.DESC, "dateCreated")));
+    }
 
     @Override
     public Post addLike(Long id) throws NoSuchElementException{

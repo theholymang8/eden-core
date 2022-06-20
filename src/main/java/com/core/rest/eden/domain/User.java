@@ -20,8 +20,8 @@ import java.util.Set;
 @AllArgsConstructor
 @NoArgsConstructor
 @SuperBuilder
-@ToString(callSuper = true, exclude = {"groups", "comment", "files"})
-@EqualsAndHashCode(callSuper = true, exclude = {"groups", "comment", "files"})
+@ToString(callSuper = true, exclude = {"groups", "files"})
+@EqualsAndHashCode(callSuper = true, exclude = {"groups", "files"})
 @Data
 
 @Entity
@@ -31,7 +31,6 @@ import java.util.Set;
 
 @SequenceGenerator(name = "idGenerator", sequenceName = "USER_SEQ", allocationSize = 1)
 public class User extends BaseModel{
-
     @NotNull(message = "{username.null}")
     @Column(length = 60, nullable = false)
     @JsonView(Views.Public.class)
@@ -84,12 +83,13 @@ public class User extends BaseModel{
     )
     private Set<File> files;
 
+
     @OneToOne(
             mappedBy = "userAvatar",
             cascade = {CascadeType.ALL},
             fetch = FetchType.LAZY
     )
-    @JsonView(Views.Detailed.class)
+    @JsonView(Views.Public.class)
     private File avatar;
 
     @NotNull(message = "{roles.null}")
@@ -117,12 +117,6 @@ public class User extends BaseModel{
     @JsonView(Views.Relational.class)
     private Set<Post> posts = new HashSet<>();
 
-
-    /*@OneToOne(
-            fetch = FetchType.LAZY,
-            mappedBy = "user")
-    @JsonView(Views.Internal.class)
-    private Comment comment;*/
 
     @ManyToMany(mappedBy = "members", fetch = FetchType.LAZY)
     @JsonView(Views.Relational.class)

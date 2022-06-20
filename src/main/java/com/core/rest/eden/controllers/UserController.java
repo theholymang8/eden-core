@@ -1,12 +1,15 @@
 package com.core.rest.eden.controllers;
 
 import com.core.rest.eden.controllers.transfer.ApiResponse;
+import com.core.rest.eden.domain.Friendship;
 import com.core.rest.eden.domain.Post;
 import com.core.rest.eden.domain.Role;
 import com.core.rest.eden.domain.User;
+import com.core.rest.eden.exceptions.UserHasAlreadySentRequestException;
 import com.core.rest.eden.services.AuthenticationService;
 import com.core.rest.eden.services.BaseService;
 import com.core.rest.eden.services.UserService;
+import com.core.rest.eden.transfer.DTO.FriendRequestDTO;
 import com.core.rest.eden.transfer.DTO.PostDTO;
 import com.core.rest.eden.transfer.DTO.UserRegisterDTO;
 import com.core.rest.eden.transfer.DTO.UserView;
@@ -82,6 +85,30 @@ public class UserController extends AbstractController<User>{
 
     @JsonView(Views.Public.class)
     @GetMapping(
+            headers = "action=findFriends",
+            params = {"userId"})
+    public ResponseEntity<ApiResponse<List<User>>> findFriends(
+            @Valid @RequestParam("userId") Long userId){
+        return ResponseEntity.ok(ApiResponse.<List<User>>builder()
+                .data(userService.findFriends(userId))
+                .build());
+    }
+
+    @JsonView(Views.Public.class)
+    @GetMapping(
+            headers = "action=findFriendsPosts",
+            params = {"username", "limit", "page"})
+    public ResponseEntity<ApiResponse<List<Post>>> findPosts(
+            @RequestParam(name = "username") String username,
+            @RequestParam Integer limit,
+            @RequestParam(defaultValue = "0") Integer page){
+        return ResponseEntity.ok(ApiResponse.<List<Post>>builder()
+                .data(userService.findFriendsPosts(username, limit, page))
+                .build());
+    }
+
+    @JsonView(Views.Public.class)
+    @GetMapping(
             headers = "action=findTopicRelated",
             params = {"username", "limit", "page"})
     public ResponseEntity<ApiResponse<List<Post>>> findTopicRelatedPosts(
@@ -90,6 +117,18 @@ public class UserController extends AbstractController<User>{
             @RequestParam(defaultValue = "0") Integer page){
         return ResponseEntity.ok(ApiResponse.<List<Post>>builder()
                 .data(userService.findTopicRelatedPosts(usernames, limit, page))
+                .build());
+    }
+
+    @JsonView(Views.Public.class)
+    @PostMapping(
+            headers = "action=findFriendship"
+    )
+    public ResponseEntity<ApiResponse<Friendship>> isAlreadyFriends(
+            @Valid @RequestBody FriendRequestDTO friendRequestDTO
+    ){
+        return ResponseEntity.ok(ApiResponse.<Friendship>builder()
+                .data(userService.isAlreadyFriends(friendRequestDTO.getRequesterId(), friendRequestDTO.getAddresseeId()))
                 .build());
     }
 
@@ -141,6 +180,66 @@ public class UserController extends AbstractController<User>{
         return ResponseEntity.ok(ApiResponse.<User>builder()
                 .data(userService.findByName(firstName, lastName))
                 .build());
+    }
+
+
+    @PostMapping(
+            headers = "action=friendRequest"
+    )
+    public ResponseEntity<ApiResponse<String>> newFriendRequest(
+            @Valid @RequestBody FriendRequestDTO friendRequestDTO
+            )
+    throws UserHasAlreadySentRequestException {
+        userService.newFriendsRequest(friendRequestDTO.getRequesterId(), friendRequestDTO.getAddresseeId());
+        return ResponseEntity.ok(ApiResponse.<String>builder()
+                .data("A request to this user has been sent successfully")
+                .build());
+    }
+
+    @JsonView(Views.Public.class)
+    @GetMapping(
+            path = "{userId}",
+            headers = "action=getAllFriendRequests"
+    )
+    public ResponseEntity<ApiResponse<List<User>>> getFriendRequests(
+            @PathVariable(name = "userId") Long userId
+    )
+            throws UserHasAlreadySentRequestException {
+        //userService.newFriendsRequest(friendRequestDTO.getRequesterId(), friendRequestDTO.getAddresseeId());
+        return ResponseEntity.ok(ApiResponse.<List<User>>builder()
+                .data(userService.getAllFriendRequests(userId))
+                .build());
+    }
+
+
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @PostMapping(
+            headers = "action=acceptRequest"
+    )
+    public void acceptFriendRequest(
+            @Valid @RequestBody FriendRequestDTO friendRequestDTO
+    ){
+        userService.acceptFriendRequest(friendRequestDTO.getRequesterId(), friendRequestDTO.getAddresseeId());
+    }
+
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @PostMapping(
+            headers = "action=rejectRequest"
+    )
+    public void rejectFriendRequest(
+            @Valid @RequestBody FriendRequestDTO friendRequestDTO
+    ){
+        userService.rejectFriendRequest(friendRequestDTO.getRequesterId(), friendRequestDTO.getAddresseeId());
+    }
+
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @DeleteMapping(
+            headers = "action=deleteFriendship"
+    )
+    public void deleteFriendship(
+            @Valid @RequestBody FriendRequestDTO friendRequestDTO
+    ){
+        userService.deleteFriendship(friendRequestDTO.getRequesterId(), friendRequestDTO.getAddresseeId());
     }
 
 

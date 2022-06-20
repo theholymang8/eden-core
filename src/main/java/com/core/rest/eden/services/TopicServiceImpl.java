@@ -3,6 +3,7 @@ package com.core.rest.eden.services;
 import com.core.rest.eden.domain.Topic;
 import com.core.rest.eden.domain.User;
 import com.core.rest.eden.repositories.TopicRepository;
+import com.core.rest.eden.transfer.projections.FriendInterestsProjection;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Service;
@@ -52,5 +53,10 @@ public class TopicServiceImpl extends BaseServiceImpl<Topic> implements TopicSer
             //topicRepository.save(topic);
         });
 
+    }
+
+    @Override
+    public List<FriendInterestsProjection> findFriendsInterests(Long userId) {
+        return topicRepository.findFriendsInterests(userId);
     }
 }

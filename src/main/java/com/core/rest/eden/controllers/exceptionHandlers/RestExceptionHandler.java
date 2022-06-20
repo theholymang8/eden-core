@@ -3,6 +3,7 @@ package com.core.rest.eden.controllers.exceptionHandlers;
 import com.core.rest.eden.controllers.transfer.ApiError;
 import com.core.rest.eden.controllers.transfer.ApiResponse;
 import com.core.rest.eden.exceptions.UserAlreadyExistsException;
+import com.core.rest.eden.exceptions.UserHasAlreadySentRequestException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,6 +23,12 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
     public ResponseEntity<ApiResponse<String>> handleMaxSizeException(MaxUploadSizeExceededException exc) {
         log.info("File Size too large", exc);
         return new ResponseEntity<>(ApiResponse.<String>builder().data("Unable to upload. File is too large!").build(), HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(UserHasAlreadySentRequestException.class)
+    public ResponseEntity<ApiResponse<String>> handleUserAlreadySentRequestException(UserHasAlreadySentRequestException exc) {
+        log.info("Has already sent a request", exc);
+        return new ResponseEntity<>(ApiResponse.<String>builder().data("A request to this user has been sent already").build(), HttpStatus.CONFLICT);
     }
 
     @ExceptionHandler(IOException.class)

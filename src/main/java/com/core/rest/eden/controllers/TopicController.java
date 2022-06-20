@@ -6,6 +6,7 @@ import com.core.rest.eden.domain.User;
 import com.core.rest.eden.services.BaseService;
 import com.core.rest.eden.services.TopicService;
 import com.core.rest.eden.services.UserService;
+import com.core.rest.eden.transfer.projections.FriendInterestsProjection;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -43,6 +44,17 @@ public class TopicController extends AbstractController<Topic>{
     public ResponseEntity<ApiResponse<Topic>> findByTitle(@RequestParam String title){
         return ResponseEntity.ok(ApiResponse.<Topic>builder()
                 .data(topicService.findByTitle(title))
+                .build());
+    }
+
+    @GetMapping(
+            path = "find",
+            headers = "action=findFriendsInterests",
+            params = {"userId"}
+    )
+    public ResponseEntity<ApiResponse<List<FriendInterestsProjection>>> findFriendsInterests(@RequestParam Long userId){
+        return ResponseEntity.ok(ApiResponse.<List<FriendInterestsProjection>>builder()
+                .data(topicService.findFriendsInterests(userId))
                 .build());
     }
 }

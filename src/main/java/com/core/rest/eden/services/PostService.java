@@ -28,6 +28,8 @@ public interface PostService extends BaseService<Post, Long>{
 
     Post deleteComment(Long postID, Comment comment);
 
+    List<Post> findFriendsPosts(User user, Integer limit, Integer page);
+
     /*Post uploadPost(PostDTO postDTO);*/
 
     void addLikev2(Post post);

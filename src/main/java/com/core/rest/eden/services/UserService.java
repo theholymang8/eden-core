@@ -1,12 +1,10 @@
 package com.core.rest.eden.services;
 
-import com.core.rest.eden.domain.Post;
-import com.core.rest.eden.domain.Role;
-import com.core.rest.eden.domain.Topic;
-import com.core.rest.eden.domain.User;
+import com.core.rest.eden.domain.*;
 import com.core.rest.eden.transfer.DTO.PostDTO;
 import com.core.rest.eden.transfer.DTO.UserRegisterDTO;
 import com.core.rest.eden.transfer.DTO.UserView;
+import com.core.rest.eden.transfer.projections.FriendInterestsProjection;
 
 import java.util.List;
 
@@ -36,12 +34,30 @@ public interface UserService extends BaseService<User, Long>{
 
     User loadUserByEmail(String username);
 
-    List<User> findFriends(User user);
+    List<User> findFriends(Long userId);
 
     List<Post> findFriendsPosts(String username, Integer limit);
 
     UserView registerUser(UserRegisterDTO user, String requestUrl);
 
-    //List<Post> findFriendsPostsPageable(String username, Integer limit);
+    void newFriendsRequest(Long requesterId, Long addresseeId);
+
+    void acceptFriendRequest(Long requesterId, Long addresseeId);
+
+    void rejectFriendRequest(Long requesterId, Long addresseeId);
+
+    void deleteFriendship(Long requesterId, Long addresseeId);
+
+    List<Post> findFriendsPosts(String username, Integer limit, Integer page);
+
+    Friendship isAlreadyFriends(Long requesterId, Long addresseeId);
+
+    Boolean hasSentFriendRequest(Long requesterId, Long addresseeId);
+
+    List<User> getAllFriendRequests(Long addresseeId);
+
+    /*nbbbbbbbbbbbbbbbbbbbbbssssssssssssssssssssssdddddddddddddddddce t54r/*/
+
+    /*List<FriendInterestsProjection> findFriendsInterest(Long userId);*/
 
 }

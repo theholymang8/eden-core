@@ -31,6 +31,19 @@ public class Group extends BaseModel{
     @Column(length = 6000, nullable = false)
     private String about;
 
+    @OneToMany(
+            cascade = {CascadeType.PERSIST, CascadeType.DETACH, CascadeType.MERGE},
+            fetch = FetchType.EAGER
+    )
+    @JoinTable(
+            name = "GROUP_TOPICS",
+            joinColumns = @JoinColumn(name = "group_id"),
+            foreignKey = @ForeignKey(name = "group_id"),
+            inverseJoinColumns = @JoinColumn(name = "topic_id"),
+            inverseForeignKey = @ForeignKey(name = "topic_id")
+    )
+    private Set<Topic> topics = new HashSet<>();
+
     @ManyToMany(
             cascade = {CascadeType.MERGE, CascadeType.REFRESH, CascadeType.DETACH},
             fetch = FetchType.LAZY)

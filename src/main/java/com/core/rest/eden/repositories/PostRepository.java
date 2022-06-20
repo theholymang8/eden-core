@@ -26,6 +26,9 @@ public interface PostRepository extends JpaRepository<Post, Long>, CustomPostRep
     @Query(value = "select distinct p from Post p where p.user = :user order by p.dateCreated desc")
     List<Post> findAllByUser(User user, Pageable pageable);
 
+    @Query(value = "select distinct p from Post p left outer join Friendship f on p.user = f.addressee where f.requester = :user")
+    List<Post> findFriendsPosts(User user, Pageable pageable);
+
     Post findByUser(User user);
 
     //@Query(value = "select distinct p from Post p left join fetch p.topics where p.topics IN :topics")

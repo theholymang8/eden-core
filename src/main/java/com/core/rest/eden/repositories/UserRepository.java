@@ -30,6 +30,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
     UserView findByUsernameAuth(String username);
 
     @Query(value = "select f.addressee from Friendship f where f.requester=:user")
+    //@Query(value = "select u from User u inner join Friendship f where f.requester=:user")
     List<User> findFriends(User user);
 
 }

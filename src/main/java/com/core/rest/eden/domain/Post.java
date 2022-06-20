@@ -64,15 +64,15 @@ public class Post extends BaseModel implements Comparable<Post>{
 
     @JsonView(Views.Public.class)
     @OneToOne(cascade = CascadeType.ALL,
-              orphanRemoval = true
+            orphanRemoval = true
     )
     //@PrimaryKeyJoinColumn
     private File image;
 
     @OneToMany(cascade = {CascadeType.MERGE, CascadeType.REFRESH, CascadeType.DETACH},
-                fetch = FetchType.LAZY,
-                orphanRemoval = true,
-    mappedBy = "post")
+            fetch = FetchType.LAZY,
+            orphanRemoval = true,
+            mappedBy = "post")
     @JsonView(Views.Public.class)
     private Set<Comment> comments = new HashSet<>();
 

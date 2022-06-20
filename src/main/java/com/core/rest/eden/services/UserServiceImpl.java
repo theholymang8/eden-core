@@ -6,6 +6,7 @@ import com.core.rest.eden.repositories.UserRepository;
 import com.core.rest.eden.transfer.DTO.PostDTO;
 import com.core.rest.eden.transfer.DTO.UserRegisterDTO;
 import com.core.rest.eden.transfer.DTO.UserView;
+import com.core.rest.eden.transfer.projections.FriendInterestsProjection;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -35,6 +36,7 @@ public class UserServiceImpl extends BaseServiceImpl<User> implements UserServic
     private final PostService postService;
     private final AuthenticationService authenticationService;
     private final FileService fileService;
+    private final FriendshipService friendshipService;
 
     //private final BCryptPasswordEncoder bCryptPasswordEncoder;
     private final PasswordEncoder passwordEncoder;
@@ -150,13 +152,14 @@ public class UserServiceImpl extends BaseServiceImpl<User> implements UserServic
     }
 
     @Override
-    public List<User> findFriends(User user) {
+    public List<User> findFriends(Long userId) {
+        User user = userRepository.getById(userId);
         return userRepository.findFriends(user);
     }
 
     @Override
     public List<Post> findFriendsPosts(String username, Integer limit) {
-        List<User> friends = this.findFriends(this.findByUsername(username));
+        /*List<User> friends = this.findFriends(this.findByUsername(username));
         List<Post> friendsPosts = new ArrayList<>();
         friends.forEach(friend -> friendsPosts.addAll(friend.getPosts()));
 
@@ -165,7 +168,8 @@ public class UserServiceImpl extends BaseServiceImpl<User> implements UserServic
         return friendsPosts.stream()
                 .sorted(Comparator.comparing(Post::getDateCreated).reversed())
                 .collect(Collectors.toList())
-                .subList(0, limit);
+                .subList(0, limit);*/
+        return null;
     }
 
     @Transactional
@@ -229,10 +233,63 @@ public class UserServiceImpl extends BaseServiceImpl<User> implements UserServic
         return authenticatedUser;
     }
 
-    /*@Override
-    public List<Post> findFriendsPostsPageable(String username, Integer limit) {
+    @Override
+    public void newFriendsRequest(Long requesterId, Long addresseeId) {
+        User requester = userRepository.getById(requesterId);
+        User addressee = userRepository.getById(addresseeId);
+        friendshipService.requestFriendship(requester, addressee);
+    }
+
+    @Override
+    public void acceptFriendRequest(Long requesterId, Long addresseeId) {
+        User requester = userRepository.getById(requesterId);
+        User addressee = userRepository.getById(addresseeId);
+        friendshipService.acceptFriendship(requester, addressee);
+    }
+
+    @Override
+    public void rejectFriendRequest(Long requesterId, Long addresseeId) {
+        User requester = userRepository.getById(requesterId);
+        User addressee = userRepository.getById(addresseeId);
+        friendshipService.rejectFriendship(requester, addressee);
+    }
+
+    @Override
+    public void deleteFriendship(Long requesterId, Long addresseeId) {
+        User requester = userRepository.getById(requesterId);
+        User addressee = userRepository.getById(addresseeId);
+        friendshipService.deleteFriendship(requester, addressee);
+    }
+
+    @Override
+    public List<Post> findFriendsPosts(String username, Integer limit, Integer page) {
         User user = userRepository.findByUsername(username);
-        return postService.findFriendsPosts(user, limit);
+        return postService.findFriendsPosts(user, limit, page);
+    }
+
+    @Override
+    public Friendship isAlreadyFriends(Long requesterId, Long addresseeId) {
+        User requester = userRepository.getById(requesterId);
+        User addressee = userRepository.getById(addresseeId);
+        return friendshipService.isAlreadyFriends(requester, addressee);
+    }
+
+    @Override
+    public Boolean hasSentFriendRequest(Long requesterId, Long addresseeId) {
+        User requester = userRepository.getById(requesterId);
+        User addressee = userRepository.getById(addresseeId);
+        return friendshipService.hasSentRequest(requester, addressee);
+    }
+
+    @Override
+    public List<User> getAllFriendRequests(Long addresseeId) {
+        User addressee = userRepository.getById(addresseeId);
+        return friendshipService.getAllFriendRequests(addressee);
+    }
+
+    /*@Override
+    public List<FriendInterestsProjection> findFriendsInterest(Long userId) {
+        return topicService.findFriendsInterests(userId);
     }*/
 
     @Override
