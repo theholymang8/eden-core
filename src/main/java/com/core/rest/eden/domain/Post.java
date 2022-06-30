@@ -47,20 +47,21 @@ public class Post extends BaseModel implements Comparable<Post>{
     private Integer likes;
 
 
-    @ManyToMany(mappedBy = "posts",
-            cascade = CascadeType.ALL,
-            fetch = FetchType.LAZY
+    @ManyToMany(
+            cascade = {CascadeType.REFRESH, CascadeType.DETACH},
+            fetch = FetchType.LAZY)
+    @JoinTable(name = "`POST_TOPICS`",
+            joinColumns = @JoinColumn(name = "`post_id`"),
+            foreignKey = @ForeignKey(name = "post_id"),
+            inverseJoinColumns = @JoinColumn(name = "`topic_id`"),
+            inverseForeignKey = @ForeignKey(name = "topic_id")
     )
-    @JsonView(Views.Public.class)
+    @JsonView(Views.Detailed.class)
     private Set<Topic> topics = new HashSet<>();
 
-    /*@JsonView(Views.Public.class)
-    @OneToMany(
-            cascade = {CascadeType.MERGE, CascadeType.REFRESH, CascadeType.DETACH},
-            fetch = FetchType.LAZY,
-            mappedBy = "post"
-    )
-    private Set<File> files;*/
+    @Column(name = "clustered_topic")
+    private Integer clustered_topic;
+
 
     @JsonView(Views.Public.class)
     @OneToOne(cascade = CascadeType.ALL,

@@ -83,12 +83,13 @@ public class UserController extends AbstractController<User>{
                 .build());
     }
 
-    @JsonView(Views.Public.class)
+    @JsonView(Views.Detailed.class)
     @GetMapping(
-            headers = "action=findFriends",
-            params = {"userId"})
+            path = "{userId}",
+            headers = "action=findFriends"
+    )
     public ResponseEntity<ApiResponse<List<User>>> findFriends(
-            @Valid @RequestParam("userId") Long userId){
+            @PathVariable("userId") Long userId){
         return ResponseEntity.ok(ApiResponse.<List<User>>builder()
                 .data(userService.findFriends(userId))
                 .build());
@@ -132,7 +133,7 @@ public class UserController extends AbstractController<User>{
                 .build());
     }
 
-    @JsonView(Views.Public.class)
+    @JsonView(Views.Detailed.class)
     @GetMapping(path = "/{username}",
             headers = "action=findPostsByUsername",
             params = {"limit", "page"})

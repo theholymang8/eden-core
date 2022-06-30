@@ -55,16 +55,10 @@ public class Topic extends BaseModel{
     private LocalDateTime dateUpdated;
 
 
-    @ManyToMany(
-            cascade = {CascadeType.REFRESH, CascadeType.DETACH},
-            fetch = FetchType.LAZY)
-    @JoinTable(name = "`POST_TOPICS`",
-            joinColumns = @JoinColumn(name = "`topic_id`"),
-            foreignKey = @ForeignKey(name = "topic_id"),
-            inverseJoinColumns = @JoinColumn(name = "`post_id`"),
-            inverseForeignKey = @ForeignKey(name = "post_id")
+    @ManyToMany(mappedBy = "topics",
+            fetch = FetchType.LAZY
     )
-    @JsonView(Views.Detailed.class)
+    @JsonView(Views.Public.class)
     private Set<Post> posts = new HashSet<>();
 
 
