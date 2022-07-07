@@ -4,6 +4,7 @@ import com.core.rest.eden.domain.*;
 import com.core.rest.eden.exceptions.UserAlreadyExistsException;
 import com.core.rest.eden.repositories.UserRepository;
 import com.core.rest.eden.transfer.DTO.PostDTO;
+import com.core.rest.eden.transfer.DTO.PostTopicsDTO;
 import com.core.rest.eden.transfer.DTO.UserRegisterDTO;
 import com.core.rest.eden.transfer.DTO.UserView;
 import com.core.rest.eden.transfer.projections.FriendInterestsProjection;
@@ -20,11 +21,11 @@ import org.springframework.util.Base64Utils;
 import org.springframework.util.StringUtils;
 
 import javax.transaction.Transactional;
-import java.time.LocalDateTime;
 import java.util.*;
-import java.util.stream.Collectors;
-
-import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 @Service
 @RequiredArgsConstructor
@@ -37,13 +38,35 @@ public class UserServiceImpl extends BaseServiceImpl<User> implements UserServic
     private final AuthenticationService authenticationService;
     private final FileService fileService;
     private final FriendshipService friendshipService;
+    private final GetTopicPostsService getTopicPostsService;
+    private final PostClassifierService postClassifierService;
+    private final SentimentAnalyzerService sentimentAnalyzerService;
 
-    //private final BCryptPasswordEncoder bCryptPasswordEncoder;
+    private ExecutorService executor = Executors.newFixedThreadPool(2);
+
     private final PasswordEncoder passwordEncoder;
 
     @Override
     public JpaRepository<User, Long> getRepository() {
         return userRepository;
+    }
+
+    @Override
+    public List<User> findByTopics(Set<Topic> topics) {
+        return userRepository.findAllByTopicsIn(topics);
+    }
+
+    @Override
+    public List<Post> getRelatedPosts(String username, Integer limit, Integer page) {
+        User user = userRepository.findByUsername(username);
+        Set<Topic> userTopics = topicService.findByUsers(List.of(user));
+        PostTopicsDTO preferredTopics = getTopicPostsService.getUserPreferencedTopics(userTopics);
+        List<Post> relatedPosts = new ArrayList<>();
+        preferredTopics.getUser_topics().forEach(topic-> {
+            relatedPosts.addAll(postService.findByClusteredTopic(topic, limit, page));
+        });
+
+        return relatedPosts;
     }
 
     @Override
@@ -109,7 +132,7 @@ public class UserServiceImpl extends BaseServiceImpl<User> implements UserServic
     }
 
     @Override
-    public Post uploadPost(PostDTO entity) {
+    public Post uploadPost(PostDTO entity) throws ExecutionException, InterruptedException {
         User user = userRepository.findByUsername(entity.getUsername());
         Post newPost = Post.builder()
                 .dateCreated(entity.getDateCreated())
@@ -117,6 +140,16 @@ public class UserServiceImpl extends BaseServiceImpl<User> implements UserServic
                 .likes(0)
                 .user(user)
                 .build();
+
+        newPost = postClassifierService.classifyPost(newPost);
+        //Update user's interests
+        updateUserInterests(user, newPost.getTopics());
+        Sentiment postSentiment = sentimentAnalyzerService.analyzePost(newPost);
+        newPost.setPostSentiment(postSentiment);
+
+        Future<Post> future = postClassifierService.clusterPost(newPost);
+
+        newPost = future.get();
 
         if(entity.getImage()!=null){
             byte[] fileBytes = Base64Utils.decodeFromString(entity.getImage().getBase64());
@@ -285,6 +318,18 @@ public class UserServiceImpl extends BaseServiceImpl<User> implements UserServic
     public List<User> getAllFriendRequests(Long addresseeId) {
         User addressee = userRepository.getById(addresseeId);
         return friendshipService.getAllFriendRequests(addressee);
+    }
+
+
+    public void updateUserInterests(User user, Set<Topic> topics) {
+        Set<Topic> userTopics = user.getTopics();
+        topics.forEach(topic -> {
+            if(!(userTopics.contains(topic))) {
+                userTopics.add(topic);
+            }
+        });
+        userRepository.save(user);
+        topicService.updateUsers(userTopics, user);
     }
 
     /*@Override

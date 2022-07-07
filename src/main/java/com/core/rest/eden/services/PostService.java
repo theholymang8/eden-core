@@ -16,6 +16,8 @@ public interface PostService extends BaseService<Post, Long>{
     @Query(value = "select p from Post p left join fetch p.topics left join fetch p.comments where p.id= :id")
     Post findById(Long id);
 
+    List<Post> findByClusteredTopic(Integer clusteredTopic, Integer limit, Integer page);
+
     List<Post> findRecentPosts(Integer limit);
 
     List<Post> findUserPosts(User user, Integer limit, Integer page);

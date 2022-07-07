@@ -44,6 +44,10 @@ public class Comment extends BaseModel{
     @ManyToOne
     private Post post;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "sentiment")
+    private Sentiment sentiment;
+
     @OneToOne
     @JsonView(Views.Public.class)
     @Getter(AccessLevel.NONE)

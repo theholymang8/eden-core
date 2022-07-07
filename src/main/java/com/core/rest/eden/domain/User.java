@@ -31,6 +31,7 @@ import java.util.Set;
 
 @SequenceGenerator(name = "idGenerator", sequenceName = "USER_SEQ", allocationSize = 1)
 public class User extends BaseModel{
+
     @NotNull(message = "{username.null}")
     @Column(length = 60, nullable = false)
     @JsonView(Views.Public.class)
@@ -101,12 +102,24 @@ public class User extends BaseModel{
     private Set<Role> roles = new HashSet<>();
 
 
+    @OneToMany(
+        mappedBy = "user",
+        cascade = CascadeType.ALL,
+        orphanRemoval = true,
+        fetch = FetchType.LAZY
+    )
+    private Set<UserPostBehaviour> userBehavior = new HashSet<>();
+
 
 
     @ManyToMany(
-            mappedBy = "users",
-            cascade = {CascadeType.REFRESH, CascadeType.MERGE, CascadeType.DETACH},
-            fetch = FetchType.LAZY
+            cascade = {CascadeType.REFRESH, CascadeType.DETACH},
+            fetch = FetchType.LAZY)
+    @JoinTable(name = "`USER_TOPICS`",
+            joinColumns = @JoinColumn(name = "`user_id`"),
+            foreignKey = @ForeignKey(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "`topic_id`"),
+            inverseForeignKey = @ForeignKey(name = "topic_id")
     )
     @JsonView(Views.Detailed.class)
     private Set<Topic> topics = new HashSet<>();

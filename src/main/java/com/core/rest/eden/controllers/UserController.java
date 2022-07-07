@@ -25,6 +25,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.util.*;
+import java.util.concurrent.ExecutionException;
 
 
 @RestController
@@ -63,7 +64,7 @@ public class UserController extends AbstractController<User>{
 
 
     @PostMapping(path = "upload")
-    public ResponseEntity<ApiResponse<Post>> createWithImageDto(@Valid @RequestBody final PostDTO entity) {
+    public ResponseEntity<ApiResponse<Post>> createWithImageDto(@Valid @RequestBody final PostDTO entity) throws ExecutionException, InterruptedException {
         return ResponseEntity.ok(ApiResponse.<Post>builder()
                 .data(userService.uploadPost(entity))
                 .build());
@@ -108,7 +109,7 @@ public class UserController extends AbstractController<User>{
                 .build());
     }
 
-    @JsonView(Views.Public.class)
+    @JsonView(Views.Detailed.class)
     @GetMapping(
             headers = "action=findTopicRelated",
             params = {"username", "limit", "page"})
@@ -118,6 +119,19 @@ public class UserController extends AbstractController<User>{
             @RequestParam(defaultValue = "0") Integer page){
         return ResponseEntity.ok(ApiResponse.<List<Post>>builder()
                 .data(userService.findTopicRelatedPosts(usernames, limit, page))
+                .build());
+    }
+
+    @JsonView(Views.Detailed.class)
+    @GetMapping(
+            headers = "action=findUserInterestPosts",
+            params = {"username", "limit", "page"})
+    public ResponseEntity<ApiResponse<List<Post>>> findUserInterestRelatedPosts(
+            @Valid @RequestParam("username") String username,
+            @RequestParam(defaultValue = "10") Integer limit,
+            @RequestParam(defaultValue = "0") Integer page){
+        return ResponseEntity.ok(ApiResponse.<List<Post>>builder()
+                .data(userService.getRelatedPosts(username, limit, page))
                 .build());
     }
 

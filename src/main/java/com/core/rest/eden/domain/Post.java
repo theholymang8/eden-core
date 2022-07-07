@@ -14,8 +14,8 @@ import java.util.Set;
 @AllArgsConstructor
 @NoArgsConstructor
 @SuperBuilder
-@ToString(callSuper = true, exclude = {"comments"})
-@EqualsAndHashCode(callSuper = true, exclude = {"comments"})
+@ToString(callSuper = true, exclude = {"comments", "postBehavior"})
+@EqualsAndHashCode(callSuper = true, exclude = {"comments", "postBehavior"})
 @Data
 
 @Entity
@@ -59,8 +59,21 @@ public class Post extends BaseModel implements Comparable<Post>{
     @JsonView(Views.Detailed.class)
     private Set<Topic> topics = new HashSet<>();
 
+    @Column
+    @JsonView(Views.Detailed.class)
+    private Sentiment postSentiment;
+
     @Column(name = "clustered_topic")
-    private Integer clustered_topic;
+    private Integer clusteredTopic;
+
+    @OneToMany(
+            mappedBy = "post",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true,
+            fetch = FetchType.LAZY
+    )
+    @JsonView(Views.Relational.class)
+    private Set<UserPostBehaviour> postBehavior = new HashSet<>();
 
 
     @JsonView(Views.Public.class)

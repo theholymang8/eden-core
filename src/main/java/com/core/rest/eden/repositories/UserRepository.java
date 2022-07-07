@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 
 import javax.transaction.Transactional;
 import java.util.List;
+import java.util.Set;
 
 
 public interface UserRepository extends JpaRepository<User, Long> {
@@ -15,6 +16,10 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @Override
     @Query(value = "select distinct u from User u left join fetch u.topics left join fetch u.files left join fetch u.posts")
     List<User> findAll();
+
+
+    //@Query(value = "select u from User u join fetch u.topics where u.topics in (:topics)")
+    List<User> findAllByTopicsIn(Set<Topic> topics);
 
     @Query
     User findByFirstNameAndLastName(String firstName, String lastName);

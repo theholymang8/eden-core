@@ -23,120 +23,134 @@ public class TopicsFactory extends AbstractLogComponent implements CommandLineRu
 
     private final UserService userService;
 
-    private final PostService postService;
-
-
 
     @Override
     public void run(String... args){
 
-        List<User> users = userService.findAll();
-
         List<Topic> topics = List.of(
           Topic.builder()
-                  .title("Bars")
-                  .dateCreated(LocalDateTime.of(2022, 3, 2, 19, 37))
+                  .title("Artificial Intelligence")
+                  .dateCreated(LocalDateTime.now())
                   .dateUpdated(null)
                   .build(),
           Topic.builder()
-                  .title("Privacy and Data")
-                  .dateCreated(LocalDateTime.of(2022, 2, 1, 21, 18))
+                  .title("Cryptocurrencies")
+                  .dateCreated(LocalDateTime.now())
                   .dateUpdated(null)
                   .build(),
           Topic.builder()
-                  .title("Social Media")
-                  .dateCreated(LocalDateTime.of(2022, 3, 18, 13, 22))
+                  .title("General Technology News")
+                  .dateCreated(LocalDateTime.now())
                   .dateUpdated(null)
                   .build(),
           Topic.builder()
-                  .title("Cryptocurrency")
-                  .dateCreated(LocalDateTime.of(2022, 3, 13, 21, 21))
+                  .title("Space & Science")
+                  .dateCreated(LocalDateTime.now())
                   .dateUpdated(null)
                   .build(),
           Topic.builder()
-                  .title("Political")
-                  .dateCreated(LocalDateTime.of(2022, 3, 1, 22, 12))
-                  .dateUpdated(null)
-                  .build(),
-          Topic.builder()
-                  .title("Social Issues")
-                  .dateCreated(LocalDateTime.of(2022, 1, 21, 18, 11))
+                  .title("Technology Products")
+                  .dateCreated(LocalDateTime.now())
                   .dateUpdated(null)
                   .build(),
           Topic.builder()
                   .title("Activism")
-                  .dateCreated(LocalDateTime.of(2021, 12, 15, 17, 25))
+                  .dateCreated(LocalDateTime.now())
                   .dateUpdated(null)
                   .build(),
           Topic.builder()
-                  .title("News")
-                  .dateCreated(LocalDateTime.of(2022, 3, 2, 19, 37))
+                  .title("Economy")
+                  .dateCreated(LocalDateTime.now())
                   .dateUpdated(null)
                   .build(),
           Topic.builder()
-                  .title("Technology")
-                  .dateCreated(LocalDateTime.of(2021, 12, 14, 19, 11))
+                  .title("Environment")
+                  .dateCreated(LocalDateTime.now())
                   .dateUpdated(null)
                   .build(),
           Topic.builder()
-                  .title("Trending")
-                  .dateCreated(LocalDateTime.of(2022, 2, 17, 16, 32))
+                  .title("Health & Politics")
+                  .dateCreated(LocalDateTime.now())
                   .dateUpdated(null)
                   .build(),
           Topic.builder()
-                  .title("Marketing")
-                  .dateCreated(LocalDateTime.of(2022, 1, 25, 14, 22))
+                  .title("International & Foreign Politics")
+                  .dateCreated(LocalDateTime.now())
+                  .dateUpdated(null)
+                  .build(),
+          Topic.builder()
+                  .title("Miscelaneous Politics & Legislation")
+                  .dateCreated(LocalDateTime.now())
                   .dateUpdated(null)
                   .build(),
           Topic.builder()
                   .title("Finance")
-                  .dateCreated(LocalDateTime.of(2022, 1, 29, 15, 22))
+                  .dateCreated(LocalDateTime.now())
                   .dateUpdated(null)
                   .build(),
           Topic.builder()
-                  .title("Sports")
-                  .dateCreated(LocalDateTime.of(2022, 1, 29, 15, 22))
+                  .title("Basketball & NBA")
+                  .dateCreated(LocalDateTime.now())
                   .dateUpdated(null)
                   .build(),
           Topic.builder()
-                  .title("Cinema")
-                  .dateCreated(LocalDateTime.of(2021, 11, 22, 13, 13))
+                  .title("Football")
+                  .dateCreated(LocalDateTime.now())
                   .dateUpdated(null)
                   .build(),
           Topic.builder()
-                  .title("Arts")
-                  .dateCreated(LocalDateTime.of(2022, 2, 22, 18, 7))
+                  .title("General & Miscelaneous Sports")
+                  .dateCreated(LocalDateTime.now())
                   .dateUpdated(null)
                   .build(),
           Topic.builder()
-                  .title("Theatre")
-                  .dateCreated(LocalDateTime.of(2022, 2, 19, 13, 21))
+                  .title("Racing Sports")
+                  .dateCreated(LocalDateTime.now())
                   .dateUpdated(null)
                   .build(),
           Topic.builder()
-                  .title("Music")
-                  .dateCreated(LocalDateTime.of(2022, 2, 21, 12, 18))
+                  .title("Tennis")
+                  .dateCreated(LocalDateTime.now())
                   .dateUpdated(null)
                   .build(),
           Topic.builder()
-                  .title("Video Games")
-                  .dateCreated(LocalDateTime.of(2022, 2, 20, 11, 21))
+                  .title("History")
+                  .dateCreated(LocalDateTime.now())
                   .dateUpdated(null)
                   .build(),
           Topic.builder()
-                  .title("Academia")
-                  .dateCreated(LocalDateTime.of(2022, 1, 21, 16, 17))
+                  .title("Modern and classical arts")
+                  .dateCreated(LocalDateTime.now())
                   .dateUpdated(null)
-                  .build()
+                  .build(),
+        Topic.builder()
+                .title("Music")
+                .dateCreated(LocalDateTime.now())
+                .dateUpdated(null)
+                .build(),
+        Topic.builder()
+                .title("Tv & Cinema")
+                .dateCreated(LocalDateTime.now())
+                .dateUpdated(null)
+                .build(),
+        Topic.builder()
+                .title("Healthy Life & Wellbeing")
+                .dateCreated(LocalDateTime.now())
+                .dateUpdated(null)
+                .build(),
+        Topic.builder()
+                .title("Medicine & Pandemics")
+                .dateCreated(LocalDateTime.now())
+                .dateUpdated(null)
+                .build(),
+        Topic.builder()
+                .title("Mental Health & Addictions")
+                .dateCreated(LocalDateTime.now())
+                .dateUpdated(null)
+                .build()
         );
 
-        //topics.forEach(topic -> logger.info("Topic : {}", topic));
-
         logger.info("Created {} topics", topics.size());
-
-        //topics.forEach(topic -> {
-           // logger.info("Topic : {}", topic);
-        //});
 
         topicService.createAll(topics);
 

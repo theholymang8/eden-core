@@ -63,13 +63,9 @@ public class Topic extends BaseModel{
 
 
     @ManyToMany(
-            cascade = {CascadeType.REFRESH, CascadeType.DETACH},
-            fetch = FetchType.LAZY)
-    @JoinTable(name = "`USER_TOPICS`",
-            joinColumns = @JoinColumn(name = "`topic_id`"),
-            foreignKey = @ForeignKey(name = "topic_id"),
-            inverseJoinColumns = @JoinColumn(name = "`user_id`"),
-            inverseForeignKey = @ForeignKey(name = "user_id")
+            mappedBy = "topics",
+            cascade = {CascadeType.REFRESH, CascadeType.MERGE, CascadeType.DETACH},
+            fetch = FetchType.LAZY
     )
     @JsonView(Views.Detailed.class)
     private Set<User> users = new HashSet<>();

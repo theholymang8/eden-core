@@ -1,17 +1,19 @@
 package com.core.rest.eden.base;
 
-import com.core.rest.eden.domain.Gender;
-import com.core.rest.eden.domain.Role;
-import com.core.rest.eden.domain.User;
+import com.core.rest.eden.domain.*;
 import com.core.rest.eden.services.UserService;
+import com.opencsv.CSVReader;
+import com.opencsv.exceptions.CsvValidationException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
+import java.io.FileReader;
+import java.io.IOException;
 import java.time.LocalDate;
-import java.util.List;
-import java.util.Set;
+import java.time.LocalDateTime;
+import java.util.*;
 
 @Component
 @RequiredArgsConstructor
@@ -20,90 +22,41 @@ public class UsersFactory extends AbstractLogComponent implements CommandLineRun
 
     private final UserService userService;
 
-    @Override
-    public void run(String... args) {
+    public void createUsers(String path) throws IOException, CsvValidationException {
 
-        List<User> users = List.of(
-                User.builder()
-                    .username("ganast")
-                    .email("giannisanast@outlook.com")
-                    .firstName("Ioannis")
-                    .lastName("Anastasopoulos")
-                    .about("Passionate Developer who needs some time alone..")
+        List<List<String>> records = new ArrayList<List<String>>();
+        try (CSVReader csvReader = new CSVReader(new FileReader(path));) {
+            String[] values = null;
+            while ((values = csvReader.readNext()) != null) {
+                records.add(Arrays.asList(values));
+            }
+            records.remove(0); //remove header from read values
+        }
+
+        List<User> users = new ArrayList<>();
+
+        records.forEach(record -> {
+            users.add(User.builder()
+                    .username(record.get(0))
+                    .email(record.get(3))
+                    .firstName(record.get(1))
+                    .lastName(record.get(2))
+                    //.about("Passionate Developer who needs some time alone..")
                     .password("$2a$12$/yJU9BvCcY2I5jyv/CxFGeOu6F0uJU0DeSQ2/vYqnRmKFg9egZYsa")
-                    .roles(Set.of(Role.USER, Role.ADMIN))
-                    .gender(Gender.MALE)
-                    .dateOfBirth(LocalDate.of(1998, 9, 4))
-                    .build(),
-                User.builder()
-                    .username("cmichail")
-                    .email("chmichail@outlook.com")
-                    .firstName("Christos")
-                    .lastName("Michail")
-                    .about("Previous Developer..")
                     .roles(Set.of(Role.USER))
-                    .gender(Gender.MALE)
-                    .password("$2a$12$/yJU9BvCcY2I5jyv/CxFGeOu6F0uJU0DeSQ2/vYqnRmKFg9egZYsa")
-                    .dateOfBirth(LocalDate.of(1996, 4, 13))
-                    .build(),
-                User.builder()
-                    .username("giokomn")
-                    .email("giorgoskomn@outlook.com")
-                    .firstName("Giorgos")
-                    .lastName("Komninos")
-                    .about("Basketball Player that has an interest in Stocks...")
-                    .roles(Set.of(Role.USER))
-                    .gender(Gender.MALE)
-                    .password("$2a$12$/yJU9BvCcY2I5jyv/CxFGeOu6F0uJU0DeSQ2/vYqnRmKFg9egZYsa")
-                    .dateOfBirth(LocalDate.of(1982, 11, 28))
-                    .build(),
-                User.builder()
-                    .username("xristzior")
-                    .email("tziorixristina@outlook.com")
-                    .firstName("Xristina")
-                    .lastName("Tziori")
-                    .about("Passionate Model with a strive for technology")
-                    .roles(Set.of(Role.USER))
-                    .gender(Gender.FEMALE)
-                    .password("$2a$12$/yJU9BvCcY2I5jyv/CxFGeOu6F0uJU0DeSQ2/vYqnRmKFg9egZYsa")
-                    .dateOfBirth(LocalDate.of(1986, 7, 2))
-                    .build(),
-                User.builder()
-                    .username("stefmich")
-                    .email("stefanosmichail@outlook.com")
-                    .firstName("Stefanos")
-                    .lastName("Michalis")
-                    .about("Gamer that spents most of his time scraping electronical components")
-                    .roles(Set.of(Role.USER))
-                    .gender(Gender.MALE)
-                    .password("$2a$12$/yJU9BvCcY2I5jyv/CxFGeOu6F0uJU0DeSQ2/vYqnRmKFg9egZYsa")
-                    .dateOfBirth(LocalDate.of(1992, 9, 12))
-                    .build(),
-                User.builder()
-                    .username("kostamoul")
-                    .email("kostasmoul@outlook.com")
-                    .firstName("Kostantinos")
-                    .lastName("Moulopoulos")
-                    .about("Soccer Player that wants to meet new people")
-                    .roles(Set.of(Role.USER))
-                    .gender(Gender.MALE)
-                    .password("$2a$12$/yJU9BvCcY2I5jyv/CxFGeOu6F0uJU0DeSQ2/vYqnRmKFg9egZYsa")
-                    .dateOfBirth(LocalDate.of(1998, 3, 21))
-                    .build(),
-                User.builder()
-                    .username("nikival")
-                    .email("nikivalente@outlook.com")
-                    .firstName("Niki")
-                    .lastName("Valente")
-                    .roles(Set.of(Role.USER))
-                    .gender(Gender.FEMALE)
-                    .about("I am a law school student with a hobby to photography.")
-                    .password("$2a$12$/yJU9BvCcY2I5jyv/CxFGeOu6F0uJU0DeSQ2/vYqnRmKFg9egZYsa")
-                    .dateOfBirth(LocalDate.of(1998, 2, 21))
-                    .build()
-        );
+                    .gender(Gender.valueOf(record.get(4)))
+                    .dateOfBirth(LocalDate.parse(record.get(6)))
+                    .build());
+        });
 
         userService.createAll(users);
-        logger.info("Created {} users", users.size());
+        logger.info("Created: {} users", users.size());
+    }
+
+    @Override
+    public void run(String... args) throws CsvValidationException, IOException {
+
+        String usersPath = "src/main/resources/dataseed/users_dataseed.csv";
+        this.createUsers(usersPath);
     }
 }

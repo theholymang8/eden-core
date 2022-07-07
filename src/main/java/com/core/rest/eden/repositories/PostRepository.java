@@ -20,6 +20,8 @@ public interface PostRepository extends JpaRepository<Post, Long>, CustomPostRep
     @Query(value = "select p from Post p join fetch p.topics left join p.comments where p.id = :id")
     Optional<Post> findById(Long id);*/
 
+    @Query(value = "select distinct p from Post p join fetch p.topics where p.clusteredTopic= :clusteredTopic")
+    List<Post> findPostsByClusteredTopic(Integer clusteredTopic, Pageable pageable);
 
     Post findByIdCustom(Long id);
 

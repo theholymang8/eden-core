@@ -17,8 +17,11 @@ import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.*;
+import java.util.concurrent.ThreadLocalRandom;
 
 @RequiredArgsConstructor
 @Component
@@ -28,12 +31,19 @@ public class PostDataseed extends AbstractLogComponent implements CommandLineRun
     private final PostService postService;
     private final UserService userService;
     private final TopicService topicService;
-
-    public void createPosts(Topic topic, String path) throws IOException, CsvValidationException {
-        List<User> users = userService.findAll();
+    private final ZoneId zone = ZoneId.of("Europe/Athens");
+    public void createPosts(Set<Topic> topics, String path, Integer topicIndex, Integer bodyIndex) throws IOException, CsvValidationException {
+        List<User> users = userService.findByTopics(topics);
         Random rn = new Random();
         Integer max = users.size() - 1;
         Integer min = 0;
+
+        long minDay = LocalDateTime.of(2022, 1, 1,23,0).toEpochSecond(zone.getRules().getOffset(LocalDateTime.now()));
+        long maxDay = LocalDateTime.of(2022, 7, 6,23,0).toEpochSecond(zone.getRules().getOffset(LocalDateTime.now()));
+        //long randomDay = ThreadLocalRandom.current().nextLong(minDay, maxDay);
+
+                //ofEpochDay(randomDay);
+        //logger.info("Random Date: {}", randomDate);
 
         List<List<String>> records = new ArrayList<List<String>>();
         try (CSVReader csvReader = new CSVReader(new FileReader(path));) {
@@ -41,70 +51,79 @@ public class PostDataseed extends AbstractLogComponent implements CommandLineRun
             while ((values = csvReader.readNext()) != null) {
                 records.add(Arrays.asList(values));
             }
+            records.remove(0); //remove header from read values
         }
 
         List<Post> posts = new ArrayList<>();
 
         records.forEach(record -> {
+            long randomDay = ThreadLocalRandom.current().nextLong(minDay, maxDay);
+            LocalDateTime randomDate = LocalDateTime.ofEpochSecond(randomDay, 0, zone.getRules().getOffset(LocalDateTime.now()));
+            //logger.info("Random Date: {}", randomDate);
             Integer index = rn.nextInt(max-min)+1;
-            //logger.info("Random Index: {}", index);
+            //logger.info(record.get(topicIndex));
+            Topic postTopic = topicService.findByTitle(record.get(topicIndex));
             posts.add(Post.builder()
-                    .body(record.get(2))
-                    .dateCreated(LocalDateTime.now())
+                    .body(record.get(bodyIndex))
+                    .dateCreated(randomDate)
                     .likes(0)
-                    .topics(Set.of(topic))
+                    .topics(Set.of(postTopic))
+                    .clusteredTopic(Integer.valueOf(record.get(4)))
                     .user(users.get(index))
                     .build());
 
         });
 
         postService.createAll(posts);
-        logger.info("Created: {} posts related to {}", posts.size(), topic.getTitle());
+        logger.info("Created: {} posts", posts.size());
     }
 
     @Override
     public void run(String... args) throws Exception {
 
-        String techPath = "src/main/resources/dataseed/tweets_tech.csv";
-        Topic techTopic = topicService.findByTitle("Technology");
+        String techPath = "src/main/resources/dataseed/tech_posts.csv";
+        Set<Topic> techTopics = new HashSet<>();
+        techTopics.add(topicService.findByTitle("Artificial Intelligence"));
+        techTopics.add(topicService.findByTitle("Cryptocurrencies"));
+        techTopics.add(topicService.findByTitle("General Technology News"));
+        techTopics.add(topicService.findByTitle("Space & Science"));
+        techTopics.add(topicService.findByTitle("Technology Products"));
+        this.createPosts(techTopics, techPath, 3, 1);
 
-        String cryptoPath = "src/main/resources/dataseed/tweets_crypto.csv";
-        Topic cryptoTopic = topicService.findByTitle("Cryptocurrency");
+        String politicsPath = "src/main/resources/dataseed/politics_posts.csv";
+        Set<Topic> politicsTopics = new HashSet<>();
+        politicsTopics.add(topicService.findByTitle("Activism"));
+        politicsTopics.add(topicService.findByTitle("Economy"));
+        politicsTopics.add(topicService.findByTitle("Environment"));
+        politicsTopics.add(topicService.findByTitle("Health & Politics"));
+        politicsTopics.add(topicService.findByTitle("International & Foreign Politics"));
+        politicsTopics.add(topicService.findByTitle("Miscelaneous Politics & Legislation"));
+        this.createPosts(politicsTopics, politicsPath, 3 ,1);
 
-        String politicsPath = "src/main/resources/dataseed/tweets_politics.csv";
-        Topic politicsTopic = topicService.findByTitle("Politics");
+        String sportsPath = "src/main/resources/dataseed/sports_posts.csv";
+        Set<Topic> sportsTopics = new HashSet<>();
+        sportsTopics.add(topicService.findByTitle("Basketball & NBA"));
+        sportsTopics.add(topicService.findByTitle("Football"));
+        sportsTopics.add(topicService.findByTitle("General & Miscelaneous Sports"));
+        sportsTopics.add(topicService.findByTitle("Racing Sports"));
+        sportsTopics.add(topicService.findByTitle("Tennis"));
+        this.createPosts(sportsTopics, sportsPath,3 ,1);
 
-        String sportsPath = "src/main/resources/dataseed/tweets_sports.csv";
-        Topic sportsTopic = topicService.findByTitle("Sports");
+        String culturePath = "src/main/resources/dataseed/culture_posts.csv";
+        Set<Topic> cultureTopics = new HashSet<>();
+        cultureTopics.add(topicService.findByTitle("History"));
+        cultureTopics.add(topicService.findByTitle("Modern and classical arts"));
+        cultureTopics.add(topicService.findByTitle("Music"));
+        cultureTopics.add(topicService.findByTitle("TV & Cinema"));
+        this.createPosts(cultureTopics, culturePath,3 ,1);
 
-        String musicPath = "src/main/resources/dataseed/tweets_music.csv";
-        Topic musicTopic = topicService.findByTitle("Music");
+        String healthPath = "src/main/resources/dataseed/health_posts.csv";
+        Set<Topic> healthTopics = new HashSet<>();
+        healthTopics.add(topicService.findByTitle("Healthy Life & Wellbeing"));
+        healthTopics.add(topicService.findByTitle("Medicine & Pandemics"));
+        healthTopics.add(topicService.findByTitle("Mental Health & Addictions"));
+        this.createPosts(healthTopics, healthPath,3 ,1);
 
-        String envPath = "src/main/resources/dataseed/tweets_env.csv";
-        Topic envTopic = topicService.findByTitle("Environment");
-
-        String artPath = "src/main/resources/dataseed/tweets_art_and_culture.csv";
-        Topic artTopic = topicService.findByTitle("Arts & Culture");
-
-        String socialJustPath = "src/main/resources/dataseed/tweets_social_just.csv";
-        Topic socialJustTopic = topicService.findByTitle("Activism");
-
-        String healthAndLifestyle = "src/main/resources/dataseed/tweets_health_and_lifestyle.csv";
-        Topic healthAndLifestyleTopic = topicService.findByTitle("Health & Lifestyle");
-
-        String videoGamesPath = "src/main/resources/dataseed/tweets_video_games.csv";
-        Topic videoGamesTopic = topicService.findByTitle("Video Games");
-
-        this.createPosts(musicTopic, musicPath);
-        this.createPosts(healthAndLifestyleTopic, healthAndLifestyle);
-        this.createPosts(sportsTopic, sportsPath);
-        this.createPosts(envTopic, envPath);
-        this.createPosts(techTopic, techPath);
-        this.createPosts(politicsTopic, politicsPath);
-        this.createPosts(cryptoTopic, cryptoPath);
-        this.createPosts(socialJustTopic, socialJustPath);
-        this.createPosts(videoGamesTopic, videoGamesPath);
-        this.createPosts(artTopic, artPath);
 
 
     }

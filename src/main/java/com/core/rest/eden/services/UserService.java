@@ -7,8 +7,14 @@ import com.core.rest.eden.transfer.DTO.UserView;
 import com.core.rest.eden.transfer.projections.FriendInterestsProjection;
 
 import java.util.List;
+import java.util.Set;
+import java.util.concurrent.ExecutionException;
 
 public interface UserService extends BaseService<User, Long>{
+
+    List<User> findByTopics(Set<Topic> topics);
+
+    List<Post> getRelatedPosts(String username, Integer limit, Integer page);
 
     User findByName(String firstName, String lastName);
 
@@ -28,7 +34,7 @@ public interface UserService extends BaseService<User, Long>{
 
     User findUserProfile(String username);
 
-    Post uploadPost(PostDTO entity);
+    Post uploadPost(PostDTO entity) throws ExecutionException, InterruptedException;
 
     Post addComment(Post post, String username);
 

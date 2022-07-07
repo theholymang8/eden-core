@@ -24,7 +24,7 @@ public class PostTopicModeler extends AbstractLogComponent implements CommandLin
 
     private final PostService postService;
 
-    public void readPosts(String path) throws IOException, CsvValidationException {
+    public void bindPosts(String path) throws IOException, CsvValidationException {
 
         List<List<String>> records = new ArrayList<List<String>>();
         try (CSVReader csvReader = new CSVReader(new FileReader(path));) {
@@ -40,7 +40,7 @@ public class PostTopicModeler extends AbstractLogComponent implements CommandLin
             Long postId = Long.parseLong(record.get(1));
             Integer topicId = Integer.parseInt(record.get(3));
             Post post = postService.findById(postId);
-            post.setClustered_topic(topicId);
+            post.setClusteredTopic(topicId);
             postService.update(post);
         });
 
@@ -50,7 +50,7 @@ public class PostTopicModeler extends AbstractLogComponent implements CommandLin
     @Override
     public void run(String... args) throws Exception {
         String path = "src/main/resources/dataseed/topic_modeled_posts.csv";
-        this.readPosts(path);
+        this.bindPosts(path);
 
     }
 }

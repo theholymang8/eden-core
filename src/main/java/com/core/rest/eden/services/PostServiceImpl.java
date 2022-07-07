@@ -2,17 +2,11 @@ package com.core.rest.eden.services;
 
 import com.core.rest.eden.domain.*;
 import com.core.rest.eden.repositories.PostRepository;
-import com.core.rest.eden.transfer.DTO.CommentView;
-import com.core.rest.eden.transfer.DTO.PostDTO;
-import com.core.rest.eden.transfer.DTO.UserPostView;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Service;
-import org.springframework.util.Base64Utils;
-import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -27,6 +21,8 @@ public class PostServiceImpl extends BaseServiceImpl<Post> implements PostServic
 
     private final FileService fileService;
 
+    private final SentimentAnalyzerService sentimentAnalyzerService;
+
     @Override
     public JpaRepository<Post, Long> getRepository() {
         return postRepository;
@@ -35,6 +31,11 @@ public class PostServiceImpl extends BaseServiceImpl<Post> implements PostServic
     @Override
     public Post findById(Long id) {
         return postRepository.findByIdCustom(id);
+    }
+
+    @Override
+    public List<Post> findByClusteredTopic(Integer clusteredTopic, Integer limit, Integer page) {
+        return postRepository.findPostsByClusteredTopic(clusteredTopic, PageRequest.of(page,limit));
     }
 
     @Override
@@ -74,6 +75,8 @@ public class PostServiceImpl extends BaseServiceImpl<Post> implements PostServic
     public Post addComment(Long postID, Comment comment) {
         Post post = postRepository.getById(postID);
         comment.setPost(post);
+        Sentiment postSentiment = sentimentAnalyzerService.analyzeComment(comment);
+        comment.setSentiment(postSentiment);
         logger.info("Post Comments: {}", post.getBody());
         //return post;
         if(post.getComments() == null) {
