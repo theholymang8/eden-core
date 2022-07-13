@@ -49,6 +49,21 @@ public class PostServiceImpl extends BaseServiceImpl<Post> implements PostServic
     }
 
     @Override
+    public Long countPostsByUser(User user) {
+        return postRepository.countAllByUser(user);
+    }
+
+    @Override
+    public Long countUserPostsByTopic(User user, Topic topic) {
+        return postRepository.countAllByUserAndTopicsIn(user, Set.of(topic));
+    }
+
+    @Override
+    public Long countUserPostsBySentimentAndTopic(User user, Topic topic, Sentiment sentiment) {
+        return postRepository.countAllByUserAndTopicsInAndPostSentiment(user, Set.of(topic), sentiment);
+    }
+
+    @Override
     public List<Post> findByTopics(Set<Topic> topics, Integer limit, Integer page) {
         //List<Post> relatedPosts = postRepository.findDistinctAllByTopicsIn(topics, PageRequest.of(0, limit, Sort.by(Sort.Direction.DESC, "dateCreated")));
 
@@ -66,7 +81,7 @@ public class PostServiceImpl extends BaseServiceImpl<Post> implements PostServic
     @Override
     public Post addLike(Long id) throws NoSuchElementException{
         Post foundPost = postRepository.getById(id);
-        //Post foundPost = postRepository.findById(id).orElseThrow(NoSuchElementException::new);
+
         foundPost.setLikes(foundPost.getLikes()+1);
         return postRepository.save(foundPost);
     }

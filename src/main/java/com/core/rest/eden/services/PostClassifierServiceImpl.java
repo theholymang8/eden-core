@@ -59,8 +59,10 @@ public class PostClassifierServiceImpl extends AbstractLogComponent implements P
 
         ClassifiedPostDTO classifiedTopic = response.getBody();
 
-        Topic foundTopic = topicService.findByTitle(classifiedTopic.getTopic());
+        logger.info("Response: {}", classifiedTopic);
 
+        Topic foundTopic = topicService.findByTitle(classifiedTopic.getTopic());
+        logger.info("Classfied Post: {}", foundTopic);
         post.setTopics(Set.of(foundTopic));
 
         return post;

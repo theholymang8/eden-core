@@ -9,10 +9,7 @@ import com.core.rest.eden.exceptions.UserHasAlreadySentRequestException;
 import com.core.rest.eden.services.AuthenticationService;
 import com.core.rest.eden.services.BaseService;
 import com.core.rest.eden.services.UserService;
-import com.core.rest.eden.transfer.DTO.FriendRequestDTO;
-import com.core.rest.eden.transfer.DTO.PostDTO;
-import com.core.rest.eden.transfer.DTO.UserRegisterDTO;
-import com.core.rest.eden.transfer.DTO.UserView;
+import com.core.rest.eden.transfer.DTO.*;
 import com.core.rest.eden.transfer.views.Views;
 import com.fasterxml.jackson.annotation.JsonView;
 import lombok.RequiredArgsConstructor;
@@ -226,6 +223,18 @@ public class UserController extends AbstractController<User>{
                 .build());
     }
 
+    @JsonView(Views.Detailed.class)
+    @GetMapping(
+            path = "recommend/{userId}",
+            headers = "action=getAllRecommendedFriends"
+    )
+    public ResponseEntity<ApiResponse<List<User>>> getRecommendedFriends(
+            @PathVariable(name = "userId") Long userId
+    ){
+        return ResponseEntity.ok(ApiResponse.<List<User>>builder()
+                .data(userService.getRecommenderFriends(userId))
+                .build());
+    }
 
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @PostMapping(
@@ -257,5 +266,14 @@ public class UserController extends AbstractController<User>{
         userService.deleteFriendship(friendRequestDTO.getRequesterId(), friendRequestDTO.getAddresseeId());
     }
 
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @PatchMapping(
+            headers = "action=updateUserSettings"
+    )
+    public void updateSettings(
+            @Valid @RequestBody UpdateSettingsDTO updateSettingsDTO
+    ){
+        userService.updateSettings(updateSettingsDTO);
+    }
 
 }

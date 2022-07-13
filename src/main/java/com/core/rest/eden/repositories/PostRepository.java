@@ -1,6 +1,7 @@
 package com.core.rest.eden.repositories;
 
 import com.core.rest.eden.domain.Post;
+import com.core.rest.eden.domain.Sentiment;
 import com.core.rest.eden.domain.Topic;
 import com.core.rest.eden.domain.User;
 import org.springframework.data.domain.Pageable;
@@ -27,6 +28,12 @@ public interface PostRepository extends JpaRepository<Post, Long>, CustomPostRep
 
     @Query(value = "select distinct p from Post p join fetch p.topics where p.user = :user order by p.dateCreated desc")
     List<Post> findAllByUser(User user, Pageable pageable);
+
+    Long countAllByUser(User user);
+
+    Long countAllByUserAndTopicsIn(User user, Set<Topic> topics);
+
+    Long countAllByUserAndTopicsInAndPostSentiment(User user, Set<Topic> topics, Sentiment sentiment);
 
     @Query(value = "select distinct p from Post p left outer join Friendship f on p.user = f.addressee where f.requester = :user")
     List<Post> findFriendsPosts(User user, Pageable pageable);

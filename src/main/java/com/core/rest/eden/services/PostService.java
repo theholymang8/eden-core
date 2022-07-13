@@ -1,9 +1,6 @@
 package com.core.rest.eden.services;
 
-import com.core.rest.eden.domain.Comment;
-import com.core.rest.eden.domain.Post;
-import com.core.rest.eden.domain.Topic;
-import com.core.rest.eden.domain.User;
+import com.core.rest.eden.domain.*;
 import com.core.rest.eden.transfer.DTO.PostDTO;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
@@ -21,6 +18,12 @@ public interface PostService extends BaseService<Post, Long>{
     List<Post> findRecentPosts(Integer limit);
 
     List<Post> findUserPosts(User user, Integer limit, Integer page);
+
+    Long countPostsByUser(User user);
+
+    Long countUserPostsByTopic(User user, Topic topic);
+
+    Long countUserPostsBySentimentAndTopic(User user, Topic topic, Sentiment sentiment);
 
     List<Post> findByTopics(Set<Topic> topics, Integer limit, Integer page);
 

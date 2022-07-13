@@ -1,17 +1,25 @@
 package com.core.rest.eden.domain;
 
-import lombok.Data;
+import lombok.*;
+import lombok.experimental.SuperBuilder;
 
 import javax.persistence.*;
 import java.io.Serializable;
 
 @Data
+@ToString
+@EqualsAndHashCode
+@NoArgsConstructor
+@AllArgsConstructor
+@SuperBuilder
+
 @Entity
 @Table(name = "USER_POST_BEHAVIOUR")
+
 public class UserPostBehaviour implements Serializable {
 
     @EmbeddedId
-    private UserPostBehaviourKey key;
+    private UserPostBehaviourKey key = new UserPostBehaviourKey();
 
     @ManyToOne
     @JoinColumn(name = "USER_ID")

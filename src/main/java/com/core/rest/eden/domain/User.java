@@ -20,8 +20,8 @@ import java.util.Set;
 @AllArgsConstructor
 @NoArgsConstructor
 @SuperBuilder
-@ToString(callSuper = true, exclude = {"groups", "files"})
-@EqualsAndHashCode(callSuper = true, exclude = {"groups", "files"})
+@ToString(callSuper = true, exclude = {"groups", "files", "userBehavior", "userTopicScores"})
+@EqualsAndHashCode(callSuper = true, exclude = {"groups", "files", "userBehavior", "userTopicScores"})
 @Data
 
 @Entity
@@ -110,7 +110,13 @@ public class User extends BaseModel{
     )
     private Set<UserPostBehaviour> userBehavior = new HashSet<>();
 
-
+    @OneToMany(
+        mappedBy = "user",
+        cascade = CascadeType.ALL,
+        orphanRemoval = true,
+        fetch = FetchType.LAZY
+    )
+    private Set<UserTopicScore> userTopicScores = new HashSet<>();
 
     @ManyToMany(
             cascade = {CascadeType.REFRESH, CascadeType.DETACH},

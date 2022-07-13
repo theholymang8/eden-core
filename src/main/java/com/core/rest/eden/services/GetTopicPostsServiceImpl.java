@@ -40,7 +40,7 @@ public class GetTopicPostsServiceImpl extends AbstractLogComponent implements Ge
         Map<String,List<String>> postBody = Map.of("user_interests", interests);
 
         HttpEntity<Map<String,List<String>>> entity = new HttpEntity<>(postBody, headers);
-        ResponseEntity<PostTopicsDTO> response = this.restTemplate.postForEntity(url, entity, PostTopicsDTO.class);
+        ResponseEntity<PostTopicsDTO> response = restTemplate.postForEntity(url, entity, PostTopicsDTO.class);
 
         if (response.getStatusCode() != HttpStatus.OK){
             throw new RecommenderServiceHTTPException("Recommender Service HTTP Exception", new Exception("Recommender Service HTTP Error Exception with error code: "+response.getStatusCode()));

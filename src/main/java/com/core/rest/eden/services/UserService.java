@@ -2,6 +2,7 @@ package com.core.rest.eden.services;
 
 import com.core.rest.eden.domain.*;
 import com.core.rest.eden.transfer.DTO.PostDTO;
+import com.core.rest.eden.transfer.DTO.UpdateSettingsDTO;
 import com.core.rest.eden.transfer.DTO.UserRegisterDTO;
 import com.core.rest.eden.transfer.DTO.UserView;
 import com.core.rest.eden.transfer.projections.FriendInterestsProjection;
@@ -62,7 +63,10 @@ public interface UserService extends BaseService<User, Long>{
 
     List<User> getAllFriendRequests(Long addresseeId);
 
-    /*nbbbbbbbbbbbbbbbbbbbbbssssssssssssssssssssssdddddddddddddddddce t54r/*/
+    void updateSettings(UpdateSettingsDTO newSettings);
+
+    List<User> getRecommenderFriends(Long userId);
+
 
     /*List<FriendInterestsProjection> findFriendsInterest(Long userId);*/
 

@@ -3,12 +3,7 @@ package com.core.rest.eden.services;
 import com.core.rest.eden.domain.*;
 import com.core.rest.eden.exceptions.UserAlreadyExistsException;
 import com.core.rest.eden.repositories.UserRepository;
-import com.core.rest.eden.transfer.DTO.PostDTO;
-import com.core.rest.eden.transfer.DTO.PostTopicsDTO;
-import com.core.rest.eden.transfer.DTO.UserRegisterDTO;
-import com.core.rest.eden.transfer.DTO.UserView;
-import com.core.rest.eden.transfer.projections.FriendInterestsProjection;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.core.rest.eden.transfer.DTO.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -41,6 +36,8 @@ public class UserServiceImpl extends BaseServiceImpl<User> implements UserServic
     private final GetTopicPostsService getTopicPostsService;
     private final PostClassifierService postClassifierService;
     private final SentimentAnalyzerService sentimentAnalyzerService;
+    private final CerebrumRestService cerebrumRestService;
+    private final UserTopicScoreService userTopicScoreService;
 
     private ExecutorService executor = Executors.newFixedThreadPool(2);
 
@@ -250,8 +247,12 @@ public class UserServiceImpl extends BaseServiceImpl<User> implements UserServic
             topicService.updateUsers(chosenTopics, newUser);
         }
 
-        userRepository.save(newUser);
 
+
+
+        userRepository.save(newUser);
+        Set<UserTopicScore> userTopicScores = userTopicScoreService.calculateUserScores(newUser);
+        logger.info("User topic scores: {}", userTopicScores);
         String accessToken = authenticationService.generateAccessToken(newUser, requestUrl);
         String refreshToken = authenticationService.generateRefreshToken(newUser, requestUrl);
 
@@ -318,6 +319,51 @@ public class UserServiceImpl extends BaseServiceImpl<User> implements UserServic
     public List<User> getAllFriendRequests(Long addresseeId) {
         User addressee = userRepository.getById(addresseeId);
         return friendshipService.getAllFriendRequests(addressee);
+    }
+
+    @Override
+    public void updateSettings(UpdateSettingsDTO newSettings) {
+
+        logger.info("DTO: {}", newSettings);
+
+        User user = userRepository.findByUsername(newSettings.getUsername());
+
+        if (newSettings.getNewUsername() != null) {
+            logger.info("Username will change");
+            user.setUsername(newSettings.getNewUsername());
+        }
+
+        if (newSettings.getNewEmail() != null) {
+            user.setEmail(newSettings.getNewEmail());
+        }
+
+        if (newSettings.getNewTopics() != null) {
+            Set<Topic> newTopics = new HashSet<>();
+            newSettings.getNewTopics().forEach(topic -> {
+                newTopics.add(topicService.findByTitle(topic));
+            });
+            user.setTopics(newTopics);
+        }
+
+        logger.info("User's info after update: {} {} {}", user.getUsername(), user.getEmail(), user.getTopics());
+
+        userRepository.save(user);
+    }
+
+    @Override
+    public List<User> getRecommenderFriends(Long userId) {
+
+        RecommendedFriendsDTO userIds = cerebrumRestService.getRecommendedFriends(userId);
+
+        List<User> recommendedFriends = new ArrayList<>();
+
+        userIds.getUserIds().forEach(id -> {
+            if(friendshipService.isAlreadyFriends(userRepository.getById(userId), userRepository.getById(id))==null){
+                recommendedFriends.add(userRepository.getById(id));
+            }
+        });
+
+        return  recommendedFriends;
     }
 
 
