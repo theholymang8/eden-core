@@ -75,7 +75,12 @@ public class PostServiceImpl extends BaseServiceImpl<Post> implements PostServic
 
     @Override
     public List<Post> findFriendsPosts(User user, Integer limit, Integer page) {
-        return postRepository.findFriendsPosts(user, PageRequest.of(page, limit, Sort.by(Sort.Direction.DESC, "dateCreated")));
+        List<Post> friendPostsRequester = postRepository.findFriendsPostsByRequester(user, PageRequest.of(page, limit, Sort.by(Sort.Direction.DESC, "dateCreated")));
+        List<Post> friendPostsAddressee = postRepository.findFriendsPostsByAddressee(user, PageRequest.of(page, limit, Sort.by(Sort.Direction.DESC, "dateCreated")));
+        List<Post> allFriendsPosts = new ArrayList<>();
+        allFriendsPosts.addAll(friendPostsRequester);
+        allFriendsPosts.addAll(friendPostsAddressee);
+        return allFriendsPosts;
     }
 
     @Override

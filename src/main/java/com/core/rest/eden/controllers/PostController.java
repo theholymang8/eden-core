@@ -60,54 +60,6 @@ public class PostController extends AbstractController<Post>{
                 .build());
     }
 
-    /*@PostMapping(path = "upload")
-    public ResponseEntity<ApiResponse<Post>> createWithImageDto(@Valid @RequestBody final PostDTO entity) {
-        return ResponseEntity.ok(ApiResponse.<Post>builder()
-                .data(postService.uploadPost(entity))
-                .build());
-    }*/
-
-    /*@PostMapping(path = "upload", consumes = "multipart/form-data")
-    public ResponseEntity<ApiResponse<Post>> createWithImage(@Valid @RequestPart("entity") final Post entity, @RequestPart("file") MultipartFile multipartFile, @RequestPart("username") String username) throws NullPointerException, IOException {
-
-
-
-        User postUser = this.userService.findByUsername(username);
-        entity.setUser(postUser);
-
-        logger.info("Multi Part File: {}", multipartFile);
-        File fileEntity = File.builder()
-                .name(StringUtils.cleanPath(multipartFile.getOriginalFilename()))
-                .contentType(multipartFile.getContentType())
-                .data(multipartFile.getBytes())
-                .build();
-
-
-        postService.create(entity);
-
-        fileEntity.setPost(entity);
-        fileEntity.setUser(postUser);
-        fileService.create(fileEntity);
-
-
-        return new ResponseEntity<>(ApiResponse.<Post>builder().data(entity).build(),
-                getNoCacheHeaders(), HttpStatus.CREATED);
-    }
-
-    @PostMapping(path = "upload",
-    headers = "action=uploadSimple",
-    consumes = "application/json")
-    public ResponseEntity<ApiResponse<Post>> createSimple(@Valid @RequestBody final Post entity, @RequestPart("username") String username) {
-
-        logger.info("Username is: {}", username);
-        User postUser = this.userService.findByUsername(username);
-        entity.setUser(postUser);
-
-        postService.create(entity);
-
-        return new ResponseEntity<>(ApiResponse.<Post>builder().data(entity).build(),
-                getNoCacheHeaders(), HttpStatus.CREATED);
-    }*/
 
     @GetMapping(path = "find",
                 headers = "action=findRecentPosts",
@@ -118,14 +70,6 @@ public class PostController extends AbstractController<Post>{
                 .build());
     }
 
-    /*@GetMapping(path = "find",
-            headers = "action=findTopicRelated",
-            params = "limit")
-    public ResponseEntity<ApiResponse<List<Post>>> findTopicRelatedPosts(@RequestParam(value = "limit", defaultValue = "10") Integer limit){
-        return ResponseEntity.ok(ApiResponse.<List<Post>>builder()
-                .data(postService.findRecentPosts(limit))
-                .build());
-    }*/
 
     @JsonView(Views.Detailed.class)
     @PutMapping(path = "like",
@@ -143,10 +87,4 @@ public class PostController extends AbstractController<Post>{
                 getNoCacheHeaders(), HttpStatus.CREATED);
     }
 
-    /*@PutMapping(path = "likev2")
-    public void addLikeV2(@Valid @RequestBody final Post post){
-
-        logger.info("Post is: {}", post);
-        postService.addLikev2(post);
-    }*/
 }

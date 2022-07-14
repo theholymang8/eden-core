@@ -90,7 +90,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .antMatchers(POST, "/users/**", "/posts/**", "/comments/**", "files/**" ).hasAnyAuthority("USER");
         http
                 .authorizeRequests()
-                .antMatchers(DELETE, "/users/**" ).hasAnyAuthority("ADMIN");
+                .antMatchers(DELETE, "/users/**" ).hasAnyAuthority("ADMIN", "USER");
         http
                 .authorizeRequests()
                 .anyRequest()

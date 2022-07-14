@@ -94,6 +94,15 @@ public class FriendshipStatusServiceImpl extends BaseServiceImpl<FriendshipStatu
     }
 
     @Override
+    public void deleteFriendship(User requester, User addressee) {
+        FriendshipStatus friendshipStatus = friendshipStatusRepository.findByRequesterAndAddresseeAndFriendshipStatus(requester, addressee, Status.ACCEPTED);
+        friendshipStatus.setFriendshipStatus(Status.DELETED);
+        friendshipStatus.setInsertionTimestamp(LocalDateTime.now());
+        friendshipStatus.setSpecifier(addressee);
+        friendshipStatusRepository.save(friendshipStatus);
+    }
+
+    @Override
     public List<User> getAllFriendRequests(User addressee) {
         List<Status> statuses = Arrays.asList(
                 Status.ACCEPTED,

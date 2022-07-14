@@ -36,7 +36,10 @@ public interface PostRepository extends JpaRepository<Post, Long>, CustomPostRep
     Long countAllByUserAndTopicsInAndPostSentiment(User user, Set<Topic> topics, Sentiment sentiment);
 
     @Query(value = "select distinct p from Post p left outer join Friendship f on p.user = f.addressee where f.requester = :user")
-    List<Post> findFriendsPosts(User user, Pageable pageable);
+    List<Post> findFriendsPostsByRequester(User user, Pageable pageable);
+
+    @Query(value = "select distinct p from Post p left outer join Friendship f on p.user = f.requester where f.addressee = :user")
+    List<Post> findFriendsPostsByAddressee(User user, Pageable pageable);
 
     Post findByUser(User user);
 

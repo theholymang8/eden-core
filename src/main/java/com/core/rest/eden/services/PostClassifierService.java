@@ -9,6 +9,8 @@ public interface PostClassifierService {
 
     Post classifyPost(Post post);
 
-    Future<Post> clusterPost(Post post);
+    //Future<Post> clusterPost(Post post);
+
+    Post clusterPost(Post post);
 
 }

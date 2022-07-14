@@ -79,7 +79,9 @@ public class UserTopicScoreServiceImpl extends AbstractLogComponent implements U
             );
         });
 
-        user.setUserTopicScores(userTopicMatrix);
+        user.getUserTopicScores().clear();
+        user.getUserTopicScores().addAll(userTopicMatrix);
+        //user.setUserTopicScores(userTopicMatrix);
         /*userService.update(user);*/
 
         logger.info("User's Interest Scores: {}", userTopicMatrix);

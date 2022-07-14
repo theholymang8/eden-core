@@ -5,6 +5,7 @@ import com.core.rest.eden.exceptions.UserAlreadyExistsException;
 import com.core.rest.eden.repositories.UserRepository;
 import com.core.rest.eden.transfer.DTO.*;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -21,10 +22,12 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 @Transactional
+@Slf4j
 public class UserServiceImpl extends BaseServiceImpl<User> implements UserService, UserDetailsService {
 
     private final UserRepository userRepository;
@@ -39,7 +42,7 @@ public class UserServiceImpl extends BaseServiceImpl<User> implements UserServic
     private final CerebrumRestService cerebrumRestService;
     private final UserTopicScoreService userTopicScoreService;
 
-    private ExecutorService executor = Executors.newFixedThreadPool(2);
+    private ExecutorService executor = Executors.newFixedThreadPool(4);
 
     private final PasswordEncoder passwordEncoder;
 
@@ -56,14 +59,30 @@ public class UserServiceImpl extends BaseServiceImpl<User> implements UserServic
     @Override
     public List<Post> getRelatedPosts(String username, Integer limit, Integer page) {
         User user = userRepository.findByUsername(username);
+
         Set<Topic> userTopics = topicService.findByUsers(List.of(user));
         PostTopicsDTO preferredTopics = getTopicPostsService.getUserPreferencedTopics(userTopics);
+
         List<Post> relatedPosts = new ArrayList<>();
         preferredTopics.getUser_topics().forEach(topic-> {
             relatedPosts.addAll(postService.findByClusteredTopic(topic, limit, page));
         });
 
-        return relatedPosts;
+
+        List<Post> friendPosts = postService.findFriendsPosts(user, limit/2, page);
+
+        List<Post> mixedPosts = new ArrayList<>(friendPosts);
+        mixedPosts.addAll(relatedPosts);
+
+        //Collections.shuffle(mixedPosts);
+
+        friendPosts.forEach(post -> {
+            logger.info("Friends's Posts : {}", post.getUser());
+        });
+
+
+
+        return mixedPosts;
     }
 
     @Override
@@ -112,8 +131,7 @@ public class UserServiceImpl extends BaseServiceImpl<User> implements UserServic
         List<User> users = new ArrayList<>();
         usernames.forEach(username -> users.add(userRepository.findByUsername(username)));
         Set<Topic> userRelatedTopics = topicService.findByUsers(users);
-        //List<Post> relatedPosts = postService.findByTopics(userRelatedTopics, limit);
-        //relatedPosts.forEach(post -> logger.info("Post: {}", post.getId()));
+
         return postService.findByTopics(userRelatedTopics, limit, page);
     }
 
@@ -138,15 +156,13 @@ public class UserServiceImpl extends BaseServiceImpl<User> implements UserServic
                 .user(user)
                 .build();
 
-        newPost = postClassifierService.classifyPost(newPost);
+        logger.info("User's interestes: {}", user.getTopics());
+        /*newPost = postClassifierService.classifyPost(newPost);
         //Update user's interests
         updateUserInterests(user, newPost.getTopics());
         Sentiment postSentiment = sentimentAnalyzerService.analyzePost(newPost);
-        newPost.setPostSentiment(postSentiment);
-
-        Future<Post> future = postClassifierService.clusterPost(newPost);
-
-        newPost = future.get();
+        newPost.setPostSentiment(postSentiment);*/
+        newPost = classifyPost(user, newPost);
 
         if(entity.getImage()!=null){
             byte[] fileBytes = Base64Utils.decodeFromString(entity.getImage().getBase64());
@@ -159,14 +175,58 @@ public class UserServiceImpl extends BaseServiceImpl<User> implements UserServic
                     .data(fileBytes)
                     .build();
             newPost.setImage(fileEntity);
-            logger.info("Image post: {}", fileEntity.getPost().getId());
-            //fileEntity.setPost(newPost);
-            //fileService.create(fileEntity);
         }
-        //userRepository.save(user);
-        //logger.info("Post Image: {}", newPost.getImage());
+
+
+
+        /*Thread classify_task = new Thread(() -> {
+            this.classifyPost(user, newPost);
+        });*/
+        newPost = clusterPost(newPost);
+        //Post finalNewPost = newPost;
+        /*Thread cluster_task = new Thread(() -> {
+            try {
+                Thread.sleep(400);
+                this.clusterPost(finalNewPost.getId());
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+
+        });*/
+        //classify_task.start();
+        //cluster_task.start();
+        //newPost = future.get();
         postService.create(newPost);
         return newPost;
+    }
+
+    public Post classifyPost(User user, Post post) {
+        post = postClassifierService.classifyPost(post);
+        //Update user's interests
+        updateUserInterests(user, post.getTopics());
+        Sentiment postSentiment = sentimentAnalyzerService.analyzePost(post);
+        post.setPostSentiment(postSentiment);
+        //postService.update(post);
+        Set<UserTopicScore> userTopicScores = userTopicScoreService.calculateUserScores(user);
+        return post;
+    }
+
+    /*public void analyzePost(Post post) throws ExecutionException, InterruptedException {
+        Sentiment postSentiment = sentimentAnalyzerService.analyzePost(post);
+        post.setPostSentiment(postSentiment);
+        postService.update(post);
+    }*/
+
+    public Post clusterPost(Post post) {
+        //Future<Post> future = postClassifierService.clusterPost(post);
+        post = postClassifierService.clusterPost(post);
+
+        //post = future.get();
+
+        logger.info("Post: {}", post);
+        return post;
+        //postService.update(post);
+
     }
 
     @Override
@@ -184,7 +244,16 @@ public class UserServiceImpl extends BaseServiceImpl<User> implements UserServic
     @Override
     public List<User> findFriends(Long userId) {
         User user = userRepository.getById(userId);
-        return userRepository.findFriends(user);
+        List<User> friendsAddressee = userRepository.findFriends(user);
+        List<User> friendsRequester = userRepository.findFriendsRequester(user);
+
+        List<User> userFriends = new ArrayList<>();
+
+        userFriends.addAll(friendsAddressee);
+        userFriends.addAll(friendsRequester);
+
+        return userFriends;
+
     }
 
     @Override
@@ -343,6 +412,7 @@ public class UserServiceImpl extends BaseServiceImpl<User> implements UserServic
                 newTopics.add(topicService.findByTitle(topic));
             });
             user.setTopics(newTopics);
+            logger.info("Topics: {}", newTopics);
         }
 
         logger.info("User's info after update: {} {} {}", user.getUsername(), user.getEmail(), user.getTopics());
@@ -369,13 +439,14 @@ public class UserServiceImpl extends BaseServiceImpl<User> implements UserServic
 
     public void updateUserInterests(User user, Set<Topic> topics) {
         Set<Topic> userTopics = user.getTopics();
+        logger.info("Topics: {}", userTopics);
         topics.forEach(topic -> {
             if(!(userTopics.contains(topic))) {
                 userTopics.add(topic);
             }
         });
         userRepository.save(user);
-        topicService.updateUsers(userTopics, user);
+        //topicService.updateUsers(userTopics, user);
     }
 
     /*@Override
@@ -401,5 +472,26 @@ public class UserServiceImpl extends BaseServiceImpl<User> implements UserServic
 
     private boolean emailExist(String email) {
         return userRepository.findByEmail(email) != null;
+    }
+
+    private static ArrayList<Post> sortHashMap(Map<Post,Integer> hashmap) {
+        HashMap<Post,Integer> temp = hashmap.entrySet()
+                .stream()
+                .sorted((o1, o2) -> o2.getValue().compareTo(o1.getValue()))
+                .collect(Collectors.toMap(
+                        Map.Entry::getKey,
+                        Map.Entry::getValue,
+                        (e1, e2) -> e1, LinkedHashMap::new
+                ));
+
+        temp.forEach((key, value) -> {
+            log.info("Reverse Sorted Hashmap : {}", value);
+        });
+        ArrayList<Post> sortedValues = new ArrayList<>();
+        temp.forEach((key, value) -> {
+            sortedValues.add(key);
+        });
+
+        return sortedValues;
     }
 }

@@ -66,10 +66,10 @@ public class FriendshipServiceImpl extends BaseServiceImpl<Friendship> implement
 
     @Override
     public void deleteFriendship(User requester, User addressee) {
-        friendshipStatusService.deleteFriendRequest(requester, addressee);
         Friendship friendship = friendshipRepository.isAlreadyFriends(requester, addressee);
         if (friendship != null) {
             //needs change to new repository method
+            friendshipStatusService.deleteFriendship(requester, addressee);
             friendshipRepository.delete(friendshipRepository.findByRequesterAndAddressee(requester, addressee));
         }else {
             logger.error("This friendship does not exist");

@@ -20,6 +20,8 @@ public interface FriendshipStatusService extends BaseService<FriendshipStatus, L
 
     FriendshipStatus blockFriendRequest(User requester, User addressee);
 
+    void deleteFriendship(User requester, User addressee);
+
     List<User> getAllFriendRequests(User addressee);
 
     List<FriendshipStatus> findAllByStatus(Status status);

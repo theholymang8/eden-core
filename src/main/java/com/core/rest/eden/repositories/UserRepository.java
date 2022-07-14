@@ -1,5 +1,6 @@
 package com.core.rest.eden.repositories;
 
+import com.core.rest.eden.domain.Friendship;
 import com.core.rest.eden.domain.Topic;
 import com.core.rest.eden.domain.User;
 import com.core.rest.eden.transfer.DTO.UserView;
@@ -34,8 +35,14 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @Query(value = "select new com.core.rest.eden.transfer.DTO.UserView(u.id, u.firstName, u.lastName, u.username, u.email, u.gender, '', '', 0L, 0L) from User u where u.username = :username")
     UserView findByUsernameAuth(String username);
 
-    @Query(value = "select f.addressee from Friendship f where f.requester=:user")
+    @Query(value = "select  f.addressee from Friendship f where f.requester=:user order by f.createdAt desc")
     //@Query(value = "select u from User u inner join Friendship f where f.requester=:user")
     List<User> findFriends(User user);
+
+    @Query(value = "select  f.requester from Friendship f where f.addressee=:user order by f.createdAt desc")
+    List<User> findFriendsRequester(User user);
+
+    @Query(value = "select f from Friendship f where (f.addressee=:user or f.requester=:user) order by f.createdAt DESC")
+    List<Friendship> findFriendships(User user);
 
 }

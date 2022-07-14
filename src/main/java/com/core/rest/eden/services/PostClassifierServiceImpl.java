@@ -63,6 +63,8 @@ public class PostClassifierServiceImpl extends AbstractLogComponent implements P
 
         Topic foundTopic = topicService.findByTitle(classifiedTopic.getTopic());
         logger.info("Classfied Post: {}", foundTopic);
+        //post.getTopics().clear();
+        //post.getTopics().addAll(Set.of(foundTopic));
         post.setTopics(Set.of(foundTopic));
 
         return post;
@@ -70,6 +72,30 @@ public class PostClassifierServiceImpl extends AbstractLogComponent implements P
     }
 
     @Override
+    public Post clusterPost(Post post) {
+        HttpHeaders headers = new HttpHeaders();
+        // set `content-type` header
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        // set `accept` header
+        headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
+
+        Map<String,String> postBody = Map.of("post_to_cluster", post.getBody());
+
+        HttpEntity<Map<String,String>> entity = new HttpEntity<>(postBody, headers);
+        ResponseEntity<ClusteredPostDTO> response = this.restTemplate.postForEntity(clusterUrl, entity, ClusteredPostDTO.class);
+
+        if (response.getStatusCode() != HttpStatus.OK){
+            throw new RecommenderServiceHTTPException("Classifier Service HTTP Exception", new Exception("Classifier Service HTTP Error Exception with error code: "+response.getStatusCode()));
+        }
+
+        ClusteredPostDTO clusteredPost = response.getBody();
+
+        logger.info("This is where the problem occurs");
+        post.setClusteredTopic(clusteredPost.getCluster());
+        return post;
+    }
+
+    /*@Override
     @Async
     public Future<Post> clusterPost(Post post) {
 
@@ -94,5 +120,5 @@ public class PostClassifierServiceImpl extends AbstractLogComponent implements P
 
 
         return new AsyncResult<>(post);
-    }
+    }*/
 }
