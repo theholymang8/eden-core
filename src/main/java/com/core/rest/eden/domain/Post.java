@@ -4,6 +4,7 @@ import com.core.rest.eden.transfer.views.Views;
 import com.fasterxml.jackson.annotation.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
+import org.springframework.data.domain.Persistable;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
@@ -59,6 +60,7 @@ public class Post extends BaseModel implements Comparable<Post>{
     @JsonView(Views.Detailed.class)
     private Set<Topic> topics = new HashSet<>();
 
+
     @Column
     @JsonView(Views.Detailed.class)
     private Sentiment postSentiment;
@@ -96,6 +98,8 @@ public class Post extends BaseModel implements Comparable<Post>{
     private User user;
 
 
+
+
     @Override
     public int compareTo(Post post) {
         if (getDateCreated() == null || post.getDateCreated() == null) {
@@ -107,4 +111,18 @@ public class Post extends BaseModel implements Comparable<Post>{
     public String getUser() {
         return this.user.getUsername();
     }
+
+    /*@Transient
+    private boolean isNew = true;
+
+    @Override
+    public boolean isNew() {
+        return isNew;
+    }
+
+    @PostLoad
+    @PrePersist
+    void trackNotNew() {
+        this.isNew = false;
+    }*/
 }

@@ -6,6 +6,7 @@ import com.core.rest.eden.domain.Sentiment;
 import com.core.rest.eden.domain.User;
 import com.core.rest.eden.domain.UserPostBehaviour;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 
 import java.util.Set;
@@ -18,6 +19,7 @@ public class PostBehaviourServiceImpl extends AbstractLogComponent implements Po
     private final PostService postService;
 
     @Override
+    @CacheEvict(value = {"relatedPosts", "topicRelatedPosts", "recommendedFriends"} , allEntries = true)
     public Post addLike(Long postId, Long userId) {
         Post foundPost = postService.find(postId);
         User userPost = userService.find(userId);
@@ -53,6 +55,7 @@ public class PostBehaviourServiceImpl extends AbstractLogComponent implements Po
     }
 
     @Override
+    @CacheEvict(value = {"relatedPosts", "topicRelatedPosts", "recommendedFriends"} , allEntries = true)
     public Post addDislike(Long postId, Long userId) {
         Post foundPost = postService.find(postId);
         User userPost = userService.find(userId);

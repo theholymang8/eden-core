@@ -1,10 +1,7 @@
 package com.core.rest.eden.services;
 
 import com.core.rest.eden.domain.*;
-import com.core.rest.eden.transfer.DTO.PostDTO;
-import com.core.rest.eden.transfer.DTO.UpdateSettingsDTO;
-import com.core.rest.eden.transfer.DTO.UserRegisterDTO;
-import com.core.rest.eden.transfer.DTO.UserView;
+import com.core.rest.eden.transfer.DTO.*;
 import com.core.rest.eden.transfer.projections.FriendInterestsProjection;
 
 import java.util.List;
@@ -38,6 +35,8 @@ public interface UserService extends BaseService<User, Long>{
     Post uploadPost(PostDTO entity) throws ExecutionException, InterruptedException;
 
     Post addComment(Post post, String username);
+
+    List<NewsDTO> getRelatedNews(String username);
 
     User loadUserByEmail(String username);
 

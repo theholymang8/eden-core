@@ -90,8 +90,9 @@ public class PostClassifierServiceImpl extends AbstractLogComponent implements P
 
         ClusteredPostDTO clusteredPost = response.getBody();
 
-        logger.info("This is where the problem occurs");
+        //logger.info("This is where the problem occurs");
         post.setClusteredTopic(clusteredPost.getCluster());
+        //post.getPostBehavior().clear();
         return post;
     }
 

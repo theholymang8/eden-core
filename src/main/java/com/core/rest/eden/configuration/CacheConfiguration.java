@@ -7,12 +7,12 @@ import org.springframework.cache.concurrent.ConcurrentMapCacheManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-@Configuration
-@EnableCaching
+//@Configuration
+//@EnableCaching
 public class CacheConfiguration {
 
-    @Bean
+    /*@Bean
     public CacheManager cacheManager() {
-        return new ConcurrentMapCacheManager("refreshTokens");
-    }
+        return new ConcurrentMapCacheManager("entities");
+    }*/
 }

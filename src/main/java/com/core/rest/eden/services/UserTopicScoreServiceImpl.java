@@ -30,15 +30,14 @@ public class UserTopicScoreServiceImpl extends AbstractLogComponent implements U
         float sentimentScore = usersPostsPerTopic != 0 ? ((float)usersPositivePostsPerTopic+usersNeutralPostsPerTopic)/usersPostsPerTopic : 1;
 
         //Add sentiment bias to the user topic score
-        float userTopicScore = 1 * sentimentScore;
 
         //logger.info("User's total posts are: {}", usersTotalPosts);
-        logger.info("User's posts for {} are: {}",topic.getTitle(), usersPostsPerTopic);
-        logger.info("User's positive posts for {} are: {}",topic.getTitle(), usersPositivePostsPerTopic);
-        logger.info("User's neutral posts for {} are: {}",topic.getTitle(), usersNeutralPostsPerTopic);
+        //logger.info("User's posts for {} are: {}",topic.getTitle(), usersPostsPerTopic);
+        //logger.info("User's positive posts for {} are: {}",topic.getTitle(), usersPositivePostsPerTopic);
+        //logger.info("User's neutral posts for {} are: {}",topic.getTitle(), usersNeutralPostsPerTopic);
         //logger.info("User's negative posts for {} are: {}",topic.getTitle(), usersNegativePostsPerTopic);
-        logger.info("User's topic score is: {}", userTopicScore);
-        return userTopicScore;
+        //logger.info("User's topic score is: {}", userTopicScore);
+        return 1 * sentimentScore;
         //logger.info("User's sentiment score is: {}", userTopicScore);
 
     }
@@ -64,7 +63,7 @@ public class UserTopicScoreServiceImpl extends AbstractLogComponent implements U
             topicScoreMap.put(topic, topicScore);
         });
 
-        logger.info("User's topics: {}", usersTopics);
+        //logger.info("User's topics: {}", usersTopics);
 
         //logger.info("User: {}", user);
 
@@ -79,12 +78,18 @@ public class UserTopicScoreServiceImpl extends AbstractLogComponent implements U
             );
         });
 
-        user.getUserTopicScores().clear();
-        user.getUserTopicScores().addAll(userTopicMatrix);
-        //user.setUserTopicScores(userTopicMatrix);
+
+        if (user.getUserTopicScores() != null){
+            user.getUserTopicScores().clear();
+            user.getUserTopicScores().addAll(userTopicMatrix);
+            return user.getUserTopicScores();
+        }
+
+
+        user.setUserTopicScores(userTopicMatrix);
         /*userService.update(user);*/
 
-        logger.info("User's Interest Scores: {}", userTopicMatrix);
+        //logger.info("User's Interest Scores: {}", userTopicMatrix);
 
         return user.getUserTopicScores();
     }

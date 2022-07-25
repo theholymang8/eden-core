@@ -13,6 +13,7 @@ import java.util.TimeZone;
 
 @SpringBootApplication
 @EnableJpaRepositories(namedQueriesLocation = "classpath:jpa-named-queries.properties")
+@EnableCaching
 public class EdenApplication {
 
 	public static void main(String[] args) {

@@ -37,7 +37,7 @@ public class SentimentAnalyzeServiceImpl extends AbstractLogComponent implements
         // set `accept` header
         headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
 
-        Map<String,String> postBody = Map.of("comment", comment.getBody());
+        Map<String,String> postBody = Map.of("entity", comment.getBody());
 
         HttpEntity<Map<String,String>> entity = new HttpEntity<>(postBody, headers);
         ResponseEntity<EntitySentimentDTO> response = this.restTemplate.postForEntity(url, entity, EntitySentimentDTO.class);
@@ -59,7 +59,7 @@ public class SentimentAnalyzeServiceImpl extends AbstractLogComponent implements
         // set `accept` header
         headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
 
-        Map<String,String> postBody = Map.of("comment", post.getBody());
+        Map<String,String> postBody = Map.of("entity", post.getBody());
 
         HttpEntity<Map<String,String>> entity = new HttpEntity<>(postBody, headers);
         ResponseEntity<EntitySentimentDTO> response = this.restTemplate.postForEntity(url, entity, EntitySentimentDTO.class);
@@ -80,13 +80,12 @@ public class SentimentAnalyzeServiceImpl extends AbstractLogComponent implements
                 Sentiment.NEUTRAL, sentimentList.getNeutral(),
                 Sentiment.NEGATIVE, sentimentList.getNegative()
                 );
-
         return maxOfMap(sentimentValues);
     }
 
     public <K, V extends Comparable<V>> K maxOfMap(Map<K, V> map) {
         Map.Entry<K, V> maxEntry = Collections.max(map.entrySet(),
-                Comparator.comparing(Map.Entry::getValue));
+                Map.Entry.comparingByValue());
         return maxEntry.getKey();
     }
 }

@@ -32,6 +32,9 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @Query(value = "select u from User u left join fetch u.topics where u.username = :username")
     User findUserProfile(String username);
 
+    @Query(value = "select u from User u left join fetch u.topics left join fetch u.userTopicScores where u.username = :username")
+    User findUserTopicsAndScore(String username);
+
     @Query(value = "select new com.core.rest.eden.transfer.DTO.UserView(u.id, u.firstName, u.lastName, u.username, u.email, u.gender, '', '', 0L, 0L) from User u where u.username = :username")
     UserView findByUsernameAuth(String username);
 

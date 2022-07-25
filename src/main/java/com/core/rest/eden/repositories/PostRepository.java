@@ -41,8 +41,12 @@ public interface PostRepository extends JpaRepository<Post, Long>, CustomPostRep
     @Query(value = "select distinct p from Post p left outer join Friendship f on p.user = f.requester where f.addressee = :user")
     List<Post> findFriendsPostsByAddressee(User user, Pageable pageable);
 
+    @Query(value = "select distinct p.clusteredTopic from Post p where p.clusteredTopic <> -1")
+    List<Integer> findClusters();
+
     Post findByUser(User user);
 
     //@Query(value = "select distinct p from Post p left join fetch p.topics where p.topics IN :topics")
-    List<Post> findDistinctAllByTopicsIn(Set<Topic> topics, Pageable pageable);
+    //List<Post> findDistinctAllByTopicsIn(Set<Topic> topics, Pageable pageable);
+    List<Post> findDistinctAllByTopicsInAndUserNot(Set<Topic> topics, User user, Pageable pageable);
 }

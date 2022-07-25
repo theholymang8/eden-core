@@ -25,7 +25,7 @@ public interface PostService extends BaseService<Post, Long>{
 
     Long countUserPostsBySentimentAndTopic(User user, Topic topic, Sentiment sentiment);
 
-    List<Post> findByTopics(Set<Topic> topics, Integer limit, Integer page);
+    List<Post> findByTopics(Set<Topic> topics, User user, Integer limit, Integer page);
 
     Post addLike(Long id);
 
@@ -34,6 +34,8 @@ public interface PostService extends BaseService<Post, Long>{
     Post deleteComment(Long postID, Comment comment);
 
     List<Post> findFriendsPosts(User user, Integer limit, Integer page);
+
+    List<Integer> findClusters();
 
     /*Post uploadPost(PostDTO postDTO);*/
 

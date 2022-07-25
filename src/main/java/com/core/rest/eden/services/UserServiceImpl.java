@@ -1,12 +1,19 @@
 package com.core.rest.eden.services;
 
 import com.core.rest.eden.domain.*;
+import com.core.rest.eden.exceptions.NewsApiConcurrencyException;
 import com.core.rest.eden.exceptions.UserAlreadyExistsException;
 import com.core.rest.eden.repositories.UserRepository;
 import com.core.rest.eden.transfer.DTO.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.AsyncResult;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -41,8 +48,9 @@ public class UserServiceImpl extends BaseServiceImpl<User> implements UserServic
     private final SentimentAnalyzerService sentimentAnalyzerService;
     private final CerebrumRestService cerebrumRestService;
     private final UserTopicScoreService userTopicScoreService;
+    private final NewsRecommendationService newsRecommendationService;
 
-    private ExecutorService executor = Executors.newFixedThreadPool(4);
+    private ExecutorService executor = Executors.newFixedThreadPool(1);
 
     private final PasswordEncoder passwordEncoder;
 
@@ -57,6 +65,7 @@ public class UserServiceImpl extends BaseServiceImpl<User> implements UserServic
     }
 
     @Override
+    @Cacheable("relatedPosts")
     public List<Post> getRelatedPosts(String username, Integer limit, Integer page) {
         User user = userRepository.findByUsername(username);
 
@@ -64,6 +73,16 @@ public class UserServiceImpl extends BaseServiceImpl<User> implements UserServic
         PostTopicsDTO preferredTopics = getTopicPostsService.getUserPreferencedTopics(userTopics);
 
         List<Post> relatedPosts = new ArrayList<>();
+
+        //If user hasn't registered any interests
+        if (!(preferredTopics.getUser_topics().size() > 0)) {
+            List<Integer> clusters = postService.findClusters();
+            clusters.forEach(cluster -> {
+                relatedPosts.addAll(postService.findByClusteredTopic(cluster, limit, page));
+            });
+        }
+
+
         preferredTopics.getUser_topics().forEach(topic-> {
             relatedPosts.addAll(postService.findByClusteredTopic(topic, limit, page));
         });
@@ -127,12 +146,26 @@ public class UserServiceImpl extends BaseServiceImpl<User> implements UserServic
     }
 
     @Override
+    @Cacheable("topicRelatedPosts")
     public List<Post> findTopicRelatedPosts(List<String> usernames, Integer limit, Integer page) {
         List<User> users = new ArrayList<>();
         usernames.forEach(username -> users.add(userRepository.findByUsername(username)));
         Set<Topic> userRelatedTopics = topicService.findByUsers(users);
+        Random rand = new Random();
 
-        return postService.findByTopics(userRelatedTopics, limit, page);
+        //Generate Random Topic for users who have not registered interests
+        if (!(userRelatedTopics.size() > 0)) {
+            List<Topic> allTopics = topicService.findAll();
+            int randInt = rand.nextInt(userRelatedTopics.size()-1);
+            while (userRelatedTopics.size() < 4) {
+                if (!(userRelatedTopics.contains(allTopics.get(randInt)))) {
+                    userRelatedTopics.add(allTopics.get(randInt));
+                }
+            }
+        }
+        return postService.findByTopics(userRelatedTopics, users.get(0), limit, page);
+
+        //TO-DO sort by likes
     }
 
     @Override
@@ -147,7 +180,30 @@ public class UserServiceImpl extends BaseServiceImpl<User> implements UserServic
     }
 
     @Override
+    @CacheEvict(value = {"relatedPosts", "topicRelatedPosts", "recommendedFriends"} , allEntries = true)
     public Post uploadPost(PostDTO entity) throws ExecutionException, InterruptedException {
+        Future<Map<String, ? extends BaseModel>> future = createPost(entity);
+
+        Map<String, ? extends BaseModel> entities = future.get();
+        User user = (User) entities.get("user");
+        Post newPost = (Post) entities.get("post");
+
+        Thread classify_task = new Thread(() -> {
+            try {
+                classifyPost(user.getUsername(), newPost.getId());
+            } catch (InterruptedException e) {
+                logger.error("Classifier Thread interrupted");
+            }
+        });
+
+
+        classify_task.start();
+
+        return newPost;
+    }
+
+    @Async
+    public Future<Map<String,? extends BaseModel>> createPost(PostDTO entity) {
         User user = userRepository.findByUsername(entity.getUsername());
         Post newPost = Post.builder()
                 .dateCreated(entity.getDateCreated())
@@ -155,15 +211,6 @@ public class UserServiceImpl extends BaseServiceImpl<User> implements UserServic
                 .likes(0)
                 .user(user)
                 .build();
-
-        logger.info("User's interestes: {}", user.getTopics());
-        /*newPost = postClassifierService.classifyPost(newPost);
-        //Update user's interests
-        updateUserInterests(user, newPost.getTopics());
-        Sentiment postSentiment = sentimentAnalyzerService.analyzePost(newPost);
-        newPost.setPostSentiment(postSentiment);*/
-        newPost = classifyPost(user, newPost);
-
         if(entity.getImage()!=null){
             byte[] fileBytes = Base64Utils.decodeFromString(entity.getImage().getBase64());
 
@@ -176,56 +223,66 @@ public class UserServiceImpl extends BaseServiceImpl<User> implements UserServic
                     .build();
             newPost.setImage(fileEntity);
         }
-
-
-
-        /*Thread classify_task = new Thread(() -> {
-            this.classifyPost(user, newPost);
-        });*/
-        newPost = clusterPost(newPost);
-        //Post finalNewPost = newPost;
-        /*Thread cluster_task = new Thread(() -> {
-            try {
-                Thread.sleep(400);
-                this.clusterPost(finalNewPost.getId());
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-
-        });*/
-        //classify_task.start();
-        //cluster_task.start();
-        //newPost = future.get();
         postService.create(newPost);
-        return newPost;
+        Map<String, ? extends BaseModel> entities = Map.of(
+                "user", user,
+                "post", newPost
+        );
+        return new AsyncResult<>(entities);
     }
 
-    public Post classifyPost(User user, Post post) {
+    public void classifyPost(String username, Long postId) throws InterruptedException {
+        Post post = null;
+        while (post == null) {
+            try {
+                post = postService.find(postId);
+
+            }catch(NoSuchElementException e){
+                Thread.sleep(1000);
+                logger.warn("Object Not Persisted yet!");
+            }
+        }
+        User user = userRepository.findUserTopicsAndScore(username);
+
         post = postClassifierService.classifyPost(post);
+
         //Update user's interests
         updateUserInterests(user, post.getTopics());
         Sentiment postSentiment = sentimentAnalyzerService.analyzePost(post);
         post.setPostSentiment(postSentiment);
-        //postService.update(post);
-        Set<UserTopicScore> userTopicScores = userTopicScoreService.calculateUserScores(user);
-        return post;
+        logger.info("Registered Post: {}", post);
+        postService.update(post);
+
+        Post finalPost = post;
+        Thread cluster_task = new Thread(() -> {
+            try {
+                clusterPost(finalPost.getId());
+            } catch (InterruptedException e) {
+                logger.error("Cluster Thread interrupted");
+            }
+
+        });
+
+        userTopicScoreService.calculateUserScores(user);
+        cluster_task.start();
     }
 
-    /*public void analyzePost(Post post) throws ExecutionException, InterruptedException {
-        Sentiment postSentiment = sentimentAnalyzerService.analyzePost(post);
-        post.setPostSentiment(postSentiment);
-        postService.update(post);
-    }*/
 
-    public Post clusterPost(Post post) {
-        //Future<Post> future = postClassifierService.clusterPost(post);
+    public void clusterPost(Long postId) throws InterruptedException {
+        Post post= null;
+        while (post == null) {
+            try {
+                post = postService.find(postId);
+
+            }catch(NoSuchElementException e){
+                Thread.sleep(1000);
+                logger.warn("Post Not Persisted yet!");
+            }
+
+        }
         post = postClassifierService.clusterPost(post);
 
-        //post = future.get();
-
-        logger.info("Post: {}", post);
-        return post;
-        //postService.update(post);
+        postService.update(post);
 
     }
 
@@ -234,6 +291,27 @@ public class UserServiceImpl extends BaseServiceImpl<User> implements UserServic
         /*User user = userRepository.findByUsername(username);
         post*/
         return null;
+    }
+
+    @Override
+    @Cacheable(value = "relatedNews")
+    public List<NewsDTO> getRelatedNews(String username) throws NewsApiConcurrencyException{
+        User user = userRepository.findUserTopicsAndScore(username);
+        Set<Topic> userTopics = user.getTopics();
+        List<NewsDTO> userRelatedNews = new ArrayList<>();
+        userTopics.forEach(topic -> {
+            Future<List<NewsDTO>> userRelatedResult = newsRecommendationService.getNews(topic.getTitle());
+            try {
+                List<NewsDTO> topicRelatedNews = userRelatedResult.get();
+                topicRelatedNews.forEach(newsDTO -> newsDTO.setTopic(topic.getTitle()));
+                //Filter body
+                topicRelatedNews.forEach(newsDTO -> newsDTO.setAbstractNew(this.filterBody(newsDTO.getSnippet(), newsDTO.getLeadParagraph())));
+                userRelatedNews.addAll(topicRelatedNews);
+            } catch (InterruptedException | ExecutionException e) {
+                throw new NewsApiConcurrencyException("Thread Interruption during news fetching", e);
+            }
+        });
+        return userRelatedNews;
     }
 
     @Override
@@ -391,6 +469,7 @@ public class UserServiceImpl extends BaseServiceImpl<User> implements UserServic
     }
 
     @Override
+    @CacheEvict(value = {"relatedPosts", "topicRelatedPosts", "recommendedFriends"} , allEntries = true)
     public void updateSettings(UpdateSettingsDTO newSettings) {
 
         logger.info("DTO: {}", newSettings);
@@ -421,6 +500,7 @@ public class UserServiceImpl extends BaseServiceImpl<User> implements UserServic
     }
 
     @Override
+    @Cacheable("recommendedFriends")
     public List<User> getRecommenderFriends(Long userId) {
 
         RecommendedFriendsDTO userIds = cerebrumRestService.getRecommendedFriends(userId);
@@ -438,8 +518,9 @@ public class UserServiceImpl extends BaseServiceImpl<User> implements UserServic
 
 
     public void updateUserInterests(User user, Set<Topic> topics) {
+        //logger.info("User: {}", user);
         Set<Topic> userTopics = user.getTopics();
-        logger.info("Topics: {}", userTopics);
+        //logger.info("Topics: {}", userTopics);
         topics.forEach(topic -> {
             if(!(userTopics.contains(topic))) {
                 userTopics.add(topic);
@@ -466,6 +547,12 @@ public class UserServiceImpl extends BaseServiceImpl<User> implements UserServic
         return new org.springframework.security.core.userdetails.User(user.getUsername(), user.getPassword(), authorities);
     }
 
+    private String filterBody(String leadParagraph, String snippet) {
+        if (leadParagraph.equals(snippet))
+            return leadParagraph;
+        return leadParagraph.concat(snippet);
+    }
+
     private boolean usernameExist(String username) {
         return userRepository.findByUsername(username) != null;
     }
@@ -474,24 +561,4 @@ public class UserServiceImpl extends BaseServiceImpl<User> implements UserServic
         return userRepository.findByEmail(email) != null;
     }
 
-    private static ArrayList<Post> sortHashMap(Map<Post,Integer> hashmap) {
-        HashMap<Post,Integer> temp = hashmap.entrySet()
-                .stream()
-                .sorted((o1, o2) -> o2.getValue().compareTo(o1.getValue()))
-                .collect(Collectors.toMap(
-                        Map.Entry::getKey,
-                        Map.Entry::getValue,
-                        (e1, e2) -> e1, LinkedHashMap::new
-                ));
-
-        temp.forEach((key, value) -> {
-            log.info("Reverse Sorted Hashmap : {}", value);
-        });
-        ArrayList<Post> sortedValues = new ArrayList<>();
-        temp.forEach((key, value) -> {
-            sortedValues.add(key);
-        });
-
-        return sortedValues;
-    }
 }
