@@ -169,18 +169,6 @@ public class UserController extends AbstractController<User>{
                 .build());
     }
 
-    @JsonView(Views.Public.class)
-    @GetMapping(
-            headers = "action=findFriendsPosts",
-            params = {"username", "limit"})
-    public ResponseEntity<ApiResponse<List<Post>>> findFriendsPosts(
-            @Valid @RequestParam("username") String username,
-            @RequestParam("limit") Integer limit){
-        return ResponseEntity.ok(ApiResponse.<List<Post>>builder()
-                .data(userService.findFriendsPosts(username, limit))
-                .build());
-    }
-
     @PostMapping(
             headers = "action=addRole",
             params = {"firstName", "lastName", "role"})
