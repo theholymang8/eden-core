@@ -66,9 +66,6 @@ public class NewRecommendationServiceImpl extends AbstractLogComponent implement
                 "api-key", apiKey
         );
 
-        //logger.info("Params: {}", params);
-        //logger.info("Params: {}", urlTemplate);
-
 
         ResponseEntity<NewsResponseDTO> response = restTemplate.exchange(
                 urlTemplate,
@@ -78,7 +75,6 @@ public class NewRecommendationServiceImpl extends AbstractLogComponent implement
                 params
         );
 
-        //logger.info("Params: {}", params);
 
         if (response.getStatusCode() != HttpStatus.OK){
             throw new RecommenderServiceHTTPException("Recommender Service HTTP Exception", new Exception("Recommender Service HTTP Error Exception with error code: "+response.getStatusCode()));
@@ -86,7 +82,7 @@ public class NewRecommendationServiceImpl extends AbstractLogComponent implement
         NewsResponseDTO responseBody = response.getBody();
 
         List<NewsDTO> news = responseBody.getResponse().getDocs();
-        //logger.info("News: {}", news);
+
         return new AsyncResult<>(news);
     }
 }

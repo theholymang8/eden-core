@@ -52,11 +52,6 @@ public class AuthenticationController extends AbstractLogComponent {
         registeredUser.setAccessToken("");
         registeredUser.setRefreshToken("");
 
-
-
-        /*logger.info("Registered User: {}", registeredUser);
-        ResponseEntity<ApiResponse<UserView>> responseEntity = ResponseEntity.ok(ApiResponse.<UserView>builder().data(registeredUser).build());
-        logger.info("Response Entity: {}", responseEntity);*/
         return ResponseEntity.ok(ApiResponse.<UserView>builder().data(registeredUser).build());
     }
 

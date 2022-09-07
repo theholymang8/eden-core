@@ -33,9 +33,7 @@ public class TopicServiceImpl extends BaseServiceImpl<Topic> implements TopicSer
     public Set<Topic> findByUsers(List<User> users) {
         Set<Topic> foundTopics = new HashSet<>();
         for(final User user : users){
-            //logger.info("User: {}", user);
             if (user != null){
-                //logger.trace("Found Topics for User : {} ", user);
                 foundTopics.addAll(topicRepository.findAllByUsers(user));
             }
         }
@@ -50,7 +48,6 @@ public class TopicServiceImpl extends BaseServiceImpl<Topic> implements TopicSer
             }else{
                 topic.getUsers().add(user);
             }
-            //topicRepository.save(topic);
         });
 
     }

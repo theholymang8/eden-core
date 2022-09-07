@@ -9,6 +9,5 @@ public interface SentimentAnalyzerService {
     Sentiment analyzeComment(Comment comment);
 
     Sentiment analyzePost(Post post);
-    //List<>
 
 }

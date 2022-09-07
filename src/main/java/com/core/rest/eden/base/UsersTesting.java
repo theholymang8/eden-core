@@ -19,22 +19,13 @@ public class UsersTesting extends AbstractLogComponent implements CommandLineRun
 
     @Override
     public void run(String... args) throws Exception {
-        /*List<User> users = userService.findAll();
-        users.forEach(user -> logger.info("User: {}", user.getTopics()));
-        logger.info("Found User: {}",users.get(0));
-        users.get(0).getPosts().forEach(post -> logger.info("Post: {}", post));*/
+
 
         List<Post> posts = userService.findPostsByUsername("ganast", 10, 0);
+
         posts.forEach(post ->{
             logger.info("Post: {}", post.getTopics());
         });
-        //userService.find(1L).getTopics().forEach(topic -> logger.info("User has these topics: {}"));
-
-        /*List<Post> posts = userService.findTopicRelatedPosts(List.of("ganast"), 10);
-
-        posts.forEach(post -> {
-            logger.info("Post: {}", post);
-        });*/
 
     }
 }

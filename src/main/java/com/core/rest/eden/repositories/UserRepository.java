@@ -19,7 +19,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
     List<User> findAll();
 
 
-    //@Query(value = "select u from User u join fetch u.topics where u.topics in (:topics)")
     List<User> findAllByTopicsIn(Set<Topic> topics);
 
     @Query
@@ -39,7 +38,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
     UserView findByUsernameAuth(String username);
 
     @Query(value = "select  f.addressee from Friendship f where f.requester=:user order by f.createdAt desc")
-    //@Query(value = "select u from User u inner join Friendship f where f.requester=:user")
     List<User> findFriends(User user);
 
     @Query(value = "select  f.requester from Friendship f where f.addressee=:user order by f.createdAt desc")

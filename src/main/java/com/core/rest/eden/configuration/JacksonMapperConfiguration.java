@@ -13,19 +13,6 @@ import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 @Configuration
 public class JacksonMapperConfiguration {
 
-    //private static final JsonSerializer<?> LOCAL_DATETIME_SERIALIZER = ;
-
-    /*@Bean
-    @Primary
-    public ObjectMapper objectMapper() {
-        *//*JavaTimeModule module = new JavaTimeModule();
-        module.addSerializer(LOCAL_DATETIME_SERIALIZER);*//*
-        return new ObjectMapper()
-                .setSerializationInclusion(JsonInclude.Include.NON_NULL)
-                .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
-                //.registerModule(module);
-    }
-*/
     @Bean
     public Jackson2ObjectMapperBuilder jackson2ObjectMapperBuilder() {
         return new

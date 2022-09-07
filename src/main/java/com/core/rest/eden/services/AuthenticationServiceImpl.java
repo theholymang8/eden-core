@@ -25,7 +25,6 @@ import static java.util.Arrays.stream;
 public class AuthenticationServiceImpl extends AbstractLogComponent implements AuthenticationService {
 
     private final AccessTokenService accessTokenService;
-    //private String issuer;
 
 
     @Override

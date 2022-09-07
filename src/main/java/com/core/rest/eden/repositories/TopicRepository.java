@@ -14,9 +14,8 @@ public interface TopicRepository extends JpaRepository<Topic, Long> {
 
     List<Topic> findAllByUsers(User user);
 
-    /*@Query(value = "select distinct t from Topic t left outer join Friendship f on f.addressee = (select u from User u ) where f.requester = :user")
-    List<Topic> findFriendsInterests(User user);*/
-
     @Query(nativeQuery = true)
     List<FriendInterestsProjection> findFriendsInterests(Long userId);
 }
+
+

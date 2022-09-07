@@ -24,10 +24,6 @@ public class NewsApiTesting extends AbstractLogComponent implements CommandLineR
 
         String query = "Artificial Intelligence";
 
-        //Future<List<NewsDTO>> future =  newsRecommendationService.getNews(query);
-
-        //List<NewsDTO> news = future.get();
-
         List<NewsDTO> news = userService.getRelatedNews("ganast");
 
 

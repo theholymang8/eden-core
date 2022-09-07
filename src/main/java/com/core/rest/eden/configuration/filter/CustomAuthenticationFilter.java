@@ -75,6 +75,7 @@ public class CustomAuthenticationFilter extends UsernamePasswordAuthenticationFi
 
     @Override
     protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response, AuthenticationException failed) throws ServletException, IOException {
+        //To replace Object Mapper Response
         ResponseEntity authenticationError =  new ResponseEntity<>(ApiResponse.<String>builder()
                 //.data("A user with this username/email already exists")
                 .apiError(ApiError.builder()

@@ -41,7 +41,6 @@ public class UserServiceImpl extends BaseServiceImpl<User> implements UserServic
     private final TopicService topicService;
     private final PostService postService;
     private final AuthenticationService authenticationService;
-    private final FileService fileService;
     private final FriendshipService friendshipService;
     private final GetTopicPostsService getTopicPostsService;
     private final PostClassifierService postClassifierService;
@@ -92,14 +91,6 @@ public class UserServiceImpl extends BaseServiceImpl<User> implements UserServic
 
         List<Post> mixedPosts = new ArrayList<>(friendPosts);
         mixedPosts.addAll(relatedPosts);
-
-        //Collections.shuffle(mixedPosts);
-
-        friendPosts.forEach(post -> {
-            logger.info("Friends's Posts : {}", post.getUser());
-        });
-
-
 
         return mixedPosts;
     }
@@ -287,13 +278,6 @@ public class UserServiceImpl extends BaseServiceImpl<User> implements UserServic
     }
 
     @Override
-    public Post addComment(Post post, String username) {
-        /*User user = userRepository.findByUsername(username);
-        post*/
-        return null;
-    }
-
-    @Override
     @Cacheable(value = "relatedNews")
     public List<NewsDTO> getRelatedNews(String username) throws NewsApiConcurrencyException{
         User user = userRepository.findUserTopicsAndScore(username);
@@ -332,21 +316,6 @@ public class UserServiceImpl extends BaseServiceImpl<User> implements UserServic
 
         return userFriends;
 
-    }
-
-    @Override
-    public List<Post> findFriendsPosts(String username, Integer limit) {
-        /*List<User> friends = this.findFriends(this.findByUsername(username));
-        List<Post> friendsPosts = new ArrayList<>();
-        friends.forEach(friend -> friendsPosts.addAll(friend.getPosts()));
-
-        limit = (friendsPosts.size() >= limit) ? limit : friendsPosts.size();
-
-        return friendsPosts.stream()
-                .sorted(Comparator.comparing(Post::getDateCreated).reversed())
-                .collect(Collectors.toList())
-                .subList(0, limit);*/
-        return null;
     }
 
     @Transactional
@@ -518,22 +487,14 @@ public class UserServiceImpl extends BaseServiceImpl<User> implements UserServic
 
 
     public void updateUserInterests(User user, Set<Topic> topics) {
-        //logger.info("User: {}", user);
         Set<Topic> userTopics = user.getTopics();
-        //logger.info("Topics: {}", userTopics);
         topics.forEach(topic -> {
             if(!(userTopics.contains(topic))) {
                 userTopics.add(topic);
             }
         });
         userRepository.save(user);
-        //topicService.updateUsers(userTopics, user);
     }
-
-    /*@Override
-    public List<FriendInterestsProjection> findFriendsInterest(Long userId) {
-        return topicService.findFriendsInterests(userId);
-    }*/
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
@@ -547,6 +508,7 @@ public class UserServiceImpl extends BaseServiceImpl<User> implements UserServic
         return new org.springframework.security.core.userdetails.User(user.getUsername(), user.getPassword(), authorities);
     }
 
+    //Filter article body
     private String filterBody(String leadParagraph, String snippet) {
         if (leadParagraph.equals(snippet))
             return leadParagraph;

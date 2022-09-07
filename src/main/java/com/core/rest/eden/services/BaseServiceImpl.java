@@ -80,7 +80,6 @@ public abstract class BaseServiceImpl<T extends BaseModel> extends AbstractLogCo
 
     @Override
     public T find(Long id) {
-        //return getRepository().getById(id);
         return getRepository().findById(id).orElseThrow(NoSuchElementException::new);
     }
 

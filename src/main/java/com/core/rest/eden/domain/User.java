@@ -20,8 +20,8 @@ import java.util.Set;
 @AllArgsConstructor
 @NoArgsConstructor
 @SuperBuilder
-@ToString(callSuper = true, exclude = {"groups", "files", "userBehavior", "userTopicScores"})
-@EqualsAndHashCode(callSuper = true, exclude = {"groups", "files", "userBehavior", "userTopicScores"})
+@ToString(callSuper = true, exclude = {"files", "userBehavior", "userTopicScores"})
+@EqualsAndHashCode(callSuper = true, exclude = {"files", "userBehavior", "userTopicScores"})
 @Data
 
 @Entity
@@ -137,10 +137,5 @@ public class User extends BaseModel{
     @OrderBy("dateCreated DESC")
     @JsonView(Views.Relational.class)
     private Set<Post> posts = new HashSet<>();
-
-
-    @ManyToMany(mappedBy = "members", fetch = FetchType.LAZY)
-    @JsonView(Views.Relational.class)
-    private Set<Group> groups = new HashSet<>();
 
 }

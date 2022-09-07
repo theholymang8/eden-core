@@ -26,13 +26,12 @@ import java.util.stream.Collectors;
 @Service
 public class AccessTokenServiceImpl extends AbstractLogComponent implements AccessTokenService {
 
+    /**
+     * Bad practice,
+     * should be replaced with a .env value.
+     * Spring IoC needs initialisation of TOKEN_SECRET
+     **/
     private static String TOKEN_SECRET = "secret";
-
-    /*@Value("${jwt.keyword}")
-    public void setTokenSecret(String keyword){
-        AccessTokenServiceImpl.TOKEN_SECRET = keyword;
-    }*/
-
 
     private static final Algorithm algorithm = Algorithm.HMAC256(TOKEN_SECRET.getBytes());
     private static final JWTVerifier verifier = JWT.require(algorithm).build();

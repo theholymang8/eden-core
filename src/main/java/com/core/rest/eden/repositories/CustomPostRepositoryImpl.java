@@ -22,8 +22,6 @@ public class CustomPostRepositoryImpl implements CustomPostRepository{
                 .getSingleResult();
 
 
-
-        //log.info("Getting post: {}", post);
         return post;
     }
 }

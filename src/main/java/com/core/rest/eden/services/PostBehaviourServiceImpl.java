@@ -42,7 +42,6 @@ public class PostBehaviourServiceImpl extends AbstractLogComponent implements Po
                 .post(foundPost)
                 .user(userPost)
                 .sentiment(Sentiment.POSITIVE)
-                .userHasSeen(Boolean.TRUE)
                 .build();
 
         userPost.getUserBehavior().add(postBehaviour);
@@ -79,7 +78,6 @@ public class PostBehaviourServiceImpl extends AbstractLogComponent implements Po
                 .post(foundPost)
                 .user(userPost)
                 .sentiment(Sentiment.NEGATIVE)
-                .userHasSeen(Boolean.TRUE)
                 .build();
 
         userPost.getUserBehavior().add(postBehaviour);

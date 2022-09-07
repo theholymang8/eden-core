@@ -119,7 +119,6 @@ public class PostServiceImpl extends BaseServiceImpl<Post> implements PostServic
     public Post deleteComment(Long postID, Comment comment) {
         Post post = postRepository.getById(postID);
         commentService.delete(comment);
-        //logger.info("Comments: {}", post.getComments());
         post.getComments().remove(comment);
         return postRepository.save(post);
     }
@@ -129,8 +128,6 @@ public class PostServiceImpl extends BaseServiceImpl<Post> implements PostServic
     public void addLikev2(Post post) {
         post.setLikes(post.getLikes()+1);
         post.setDateUpdated(LocalDateTime.now());
-        //logger.info("Post by service is :{}", post);
-        // logger.info("post has: {} likes", post.getLikes());
         postRepository.save(post);
     }
 

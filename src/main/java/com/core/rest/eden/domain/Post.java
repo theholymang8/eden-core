@@ -22,7 +22,7 @@ import java.util.Set;
 @Entity
 @Table(name = "POSTS")
 
-//@JsonIgnoreProperties(value = {"user"})
+
 
 @SequenceGenerator(name = "idGenerator", sequenceName = "POST_SEQ", allocationSize = 1)
 public class Post extends BaseModel implements Comparable<Post>{
@@ -112,17 +112,4 @@ public class Post extends BaseModel implements Comparable<Post>{
         return this.user.getUsername();
     }
 
-    /*@Transient
-    private boolean isNew = true;
-
-    @Override
-    public boolean isNew() {
-        return isNew;
-    }
-
-    @PostLoad
-    @PrePersist
-    void trackNotNew() {
-        this.isNew = false;
-    }*/
 }

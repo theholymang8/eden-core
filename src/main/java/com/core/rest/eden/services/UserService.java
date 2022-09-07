@@ -34,15 +34,11 @@ public interface UserService extends BaseService<User, Long>{
 
     Post uploadPost(PostDTO entity) throws ExecutionException, InterruptedException;
 
-    Post addComment(Post post, String username);
-
     List<NewsDTO> getRelatedNews(String username);
 
     User loadUserByEmail(String username);
 
     List<User> findFriends(Long userId);
-
-    List<Post> findFriendsPosts(String username, Integer limit);
 
     UserView registerUser(UserRegisterDTO user, String requestUrl);
 
@@ -65,8 +61,5 @@ public interface UserService extends BaseService<User, Long>{
     void updateSettings(UpdateSettingsDTO newSettings);
 
     List<User> getRecommenderFriends(Long userId);
-
-
-    /*List<FriendInterestsProjection> findFriendsInterest(Long userId);*/
 
 }

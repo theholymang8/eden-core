@@ -17,9 +17,6 @@ import java.util.Set;
 @Repository
 public interface PostRepository extends JpaRepository<Post, Long>, CustomPostRepository {
 
-    /*@Override
-    @Query(value = "select p from Post p join fetch p.topics left join p.comments where p.id = :id")
-    Optional<Post> findById(Long id);*/
 
     @Query(value = "select distinct p from Post p join fetch p.topics where p.clusteredTopic= :clusteredTopic")
     List<Post> findPostsByClusteredTopic(Integer clusteredTopic, Pageable pageable);
@@ -46,7 +43,5 @@ public interface PostRepository extends JpaRepository<Post, Long>, CustomPostRep
 
     Post findByUser(User user);
 
-    //@Query(value = "select distinct p from Post p left join fetch p.topics where p.topics IN :topics")
-    //List<Post> findDistinctAllByTopicsIn(Set<Topic> topics, Pageable pageable);
     List<Post> findDistinctAllByTopicsInAndUserNot(Set<Topic> topics, User user, Pageable pageable);
 }

@@ -31,7 +31,6 @@ public class UserPostBehaviour implements Serializable {
     @MapsId("postId")
     private Post post;
 
-    private Boolean userHasSeen;
 
     @Enumerated(EnumType.STRING)
     private Sentiment sentiment;

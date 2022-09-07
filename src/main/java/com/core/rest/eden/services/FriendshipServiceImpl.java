@@ -7,6 +7,7 @@ import com.core.rest.eden.exceptions.AlreadyFriendsException;
 import com.core.rest.eden.repositories.FriendshipRepository;
 import com.core.rest.eden.transfer.DTO.FriendRequestDTO;
 import lombok.AllArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Service;
 
@@ -25,6 +26,7 @@ public class FriendshipServiceImpl extends BaseServiceImpl<Friendship> implement
         return friendshipRepository;
     }
 
+    @CacheEvict(value = {"relatedPosts", "topicRelatedPosts", "recommendedFriends"})
     @Override
     public Friendship acceptFriendship(User requester, User addressee) throws AlreadyFriendsException{
         Friendship friendship = friendshipRepository.isAlreadyFriends(requester, addressee);
@@ -60,11 +62,13 @@ public class FriendshipServiceImpl extends BaseServiceImpl<Friendship> implement
     }
 
     @Override
+    @CacheEvict(value = {"relatedPosts", "topicRelatedPosts", "recommendedFriends"})
     public void rejectFriendship(User requester, User addressee) {
         friendshipStatusService.rejectFriendRequest(requester, addressee);
     }
 
     @Override
+    @CacheEvict(value = {"relatedPosts", "topicRelatedPosts", "recommendedFriends"})
     public void deleteFriendship(User requester, User addressee) {
         Friendship friendship = friendshipRepository.isAlreadyFriends(requester, addressee);
         if (friendship != null) {
@@ -78,7 +82,6 @@ public class FriendshipServiceImpl extends BaseServiceImpl<Friendship> implement
 
     @Override
     public List<User> getAllFriendRequests(User addressee) {
-        //return null;
         return friendshipStatusService.getAllFriendRequests(addressee);
     }
 

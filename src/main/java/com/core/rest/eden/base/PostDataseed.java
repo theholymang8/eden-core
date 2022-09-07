@@ -32,6 +32,7 @@ public class PostDataseed extends AbstractLogComponent implements CommandLineRun
     private final UserService userService;
     private final TopicService topicService;
     private final ZoneId zone = ZoneId.of("Europe/Athens");
+
     public void createPosts(Set<Topic> topics, String path, Integer topicIndex, Integer bodyIndex) throws IOException, CsvValidationException {
         List<User> users = userService.findByTopics(topics);
         Random rn = new Random();
@@ -40,10 +41,6 @@ public class PostDataseed extends AbstractLogComponent implements CommandLineRun
 
         long minDay = LocalDateTime.of(2022, 1, 1,23,0).toEpochSecond(zone.getRules().getOffset(LocalDateTime.now()));
         long maxDay = LocalDateTime.of(2022, 7, 6,23,0).toEpochSecond(zone.getRules().getOffset(LocalDateTime.now()));
-        //long randomDay = ThreadLocalRandom.current().nextLong(minDay, maxDay);
-
-                //ofEpochDay(randomDay);
-        //logger.info("Random Date: {}", randomDate);
 
         List<List<String>> records = new ArrayList<List<String>>();
         try (CSVReader csvReader = new CSVReader(new FileReader(path));) {
@@ -59,9 +56,9 @@ public class PostDataseed extends AbstractLogComponent implements CommandLineRun
         records.forEach(record -> {
             long randomDay = ThreadLocalRandom.current().nextLong(minDay, maxDay);
             LocalDateTime randomDate = LocalDateTime.ofEpochSecond(randomDay, 0, zone.getRules().getOffset(LocalDateTime.now()));
-            //logger.info("Random Date: {}", randomDate);
+
             Integer index = rn.nextInt(max-min)+1;
-            //logger.info(record.get(topicIndex));
+
             Topic postTopic = topicService.findByTitle(record.get(topicIndex));
             posts.add(Post.builder()
                     .body(record.get(bodyIndex))

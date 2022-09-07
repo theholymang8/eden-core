@@ -38,8 +38,6 @@ public class File extends BaseModel {
     @Lob
     @JsonView(Views.Public.class)
     @Getter(AccessLevel.NONE)
-    /*@Type(type = "org.hibernate.type.ImageType")*/
-    //@Type(type = "org.hibernate.type.PrimitiveByteArrayBlobType")
     private byte[] data;
 
     @JsonView(Views.Public.class)
@@ -53,17 +51,18 @@ public class File extends BaseModel {
     @JsonView(Views.Detailed.class)
     private User userAvatar;
 
-    //@MapsId
+
     @OneToOne
     @JoinColumn(name = "post_id")
     @JsonView(Views.Internal.class)
     private Post post;
 
 
+    //Custom Getter for image data, encoding it to base64 directly
     public String getData() {
         String encodedImage = Base64.getEncoder().encodeToString(this.data);
         return encodedImage;
-        //return "";
+
     }
 
 }

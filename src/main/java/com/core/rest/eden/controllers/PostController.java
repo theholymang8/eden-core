@@ -2,28 +2,17 @@ package com.core.rest.eden.controllers;
 
 import com.core.rest.eden.controllers.transfer.ApiResponse;
 import com.core.rest.eden.domain.Comment;
-import com.core.rest.eden.domain.File;
 import com.core.rest.eden.domain.Post;
-import com.core.rest.eden.domain.User;
 import com.core.rest.eden.services.*;
-import com.core.rest.eden.transfer.DTO.PostDTO;
 import com.core.rest.eden.transfer.views.Views;
-import com.core.rest.eden.utility.TokenUtil;
 import com.fasterxml.jackson.annotation.JsonView;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.util.Base64Utils;
-import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
-import java.io.IOException;
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
